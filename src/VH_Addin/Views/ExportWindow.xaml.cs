@@ -445,6 +445,8 @@ namespace VH_Addin.Views
             gridTabSelection.Visibility = System.Windows.Visibility.Collapsed;
             gridTabSettings.Visibility = System.Windows.Visibility.Collapsed;
             gridTabNaming.Visibility = System.Windows.Visibility.Collapsed;
+            gridTabOrder.Visibility = System.Windows.Visibility.Collapsed;
+            gridTabDwgSettings.Visibility = System.Windows.Visibility.Collapsed;
             
             btnTabSelection.Opacity = 0.5; btnTabSelection.FontWeight = FontWeights.Normal;
             btnTabSettings.Opacity = 0.5; btnTabSettings.FontWeight = FontWeights.Normal;
