@@ -16,6 +16,7 @@ namespace VH_Addin.Views
     {
         private readonly Document _doc;
         private string _targetFolder;
+        private System.ComponentModel.ICollectionView _sheetsView;
 
         public class SheetItem : INotifyPropertyChanged
         {
@@ -89,6 +90,22 @@ namespace VH_Addin.Views
             listNamingRule.ItemsSource = NamingRule;
             
             UpdatePreview();
+
+            _sheetsView = System.Windows.Data.CollectionViewSource.GetDefaultView(Sheets);
+            _sheetsView.Filter = SheetFilter;
+        }
+
+        private bool SheetFilter(object obj)
+        {
+            if (obj is SheetItem item)
+            {
+                string search = txtSearch.Text;
+                if (string.IsNullOrEmpty(search) || search == "Zoeken op nummer of naam...") return true;
+                
+                return item.SheetNumber.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                       item.Name.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+            return false;
         }
 
         private void LoadParameters()
@@ -389,10 +406,23 @@ namespace VH_Addin.Views
             DWGExportOptions options = DWGExportOptions.GetPredefinedOptions(_doc, ""); 
             if (options == null) options = new DWGExportOptions();
             
-            // Minimal settings for DWG
+            // Apply UI settings
+            // Version
+            if (cmbDwgVersion.SelectedIndex == 1) options.FileVersion = ACADVersion.R2018;
+            else if (cmbDwgVersion.SelectedIndex == 2) options.FileVersion = ACADVersion.R2013;
+            else if (cmbDwgVersion.SelectedIndex == 3) options.FileVersion = ACADVersion.R2010;
+            else options.FileVersion = ACADVersion.Default;
+
+            // Coordinates
+            options.SharedCoords = cmbDwgCoordinates.SelectedIndex == 1;
+
+            // Units
+            if (cmbDwgUnits.SelectedIndex == 1) options.TargetUnit = ExportUnit.Meter;
+            else if (cmbDwgUnits.SelectedIndex == 2) options.TargetUnit = ExportUnit.Centimeter;
+            else options.TargetUnit = ExportUnit.Millimeter;
+
+            // Colors
             options.Colors = ExportColorMode.IndexColors;
-            // DWGExportOptions property is TargetUnit (older) or just use default
-            // options.TargetUnit = ExportUnit.Millimeter; 
             
             _doc.Export(_targetFolder, GetConfiguredFileName(item), new List<ElementId> { item.Sheet.Id }, options);
         }
@@ -420,6 +450,7 @@ namespace VH_Addin.Views
             btnTabSettings.Opacity = 0.5; btnTabSettings.FontWeight = FontWeights.Normal;
             btnTabNaming.Opacity = 0.5; btnTabNaming.FontWeight = FontWeights.Normal;
             btnTabOrder.Opacity = 0.5; btnTabOrder.FontWeight = FontWeights.Normal;
+            btnTabDwgSettings.Opacity = 0.5; btnTabDwgSettings.FontWeight = FontWeights.Normal;
 
             if (btn == btnTabSelection)
             {
@@ -444,6 +475,12 @@ namespace VH_Addin.Views
                 gridTabOrder.Visibility = System.Windows.Visibility.Visible;
                 btnTabOrder.Opacity = 1.0;
                 btnTabOrder.FontWeight = FontWeights.Bold;
+            }
+            else if (btn == btnTabDwgSettings)
+            {
+                gridTabDwgSettings.Visibility = System.Windows.Visibility.Visible;
+                btnTabDwgSettings.Opacity = 1.0;
+                btnTabDwgSettings.FontWeight = FontWeights.Bold;
             }
         }
 
@@ -610,6 +647,37 @@ namespace VH_Addin.Views
         private void ExportFormat_Changed(object sender, RoutedEventArgs e)
         {
             if (IsLoaded) UpdatePreview();
+        }
+
+        private void ChkExportDwg_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!IsLoaded) return;
+            bool doDwg = chkExportDwg.IsChecked == true;
+            btnTabDwgSettings.Visibility = doDwg ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+            if (IsLoaded) UpdatePreview();
+        }
+
+        private void TxtSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            _sheetsView?.Refresh();
+        }
+
+        private void TxtSearch_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (txtSearch.Text == "Zoeken op nummer of naam...")
+            {
+                txtSearch.Text = "";
+                txtSearch.Foreground = System.Windows.Media.Brushes.Black;
+            }
+        }
+
+        private void TxtSearch_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtSearch.Text))
+            {
+                txtSearch.Text = "Zoeken op nummer of naam...";
+                txtSearch.Foreground = System.Windows.Media.Brushes.Gray;
+            }
         }
 
         private void BtnSelectAll_Click(object sender, RoutedEventArgs e) { foreach (var s in Sheets) s.IsSelected = true; }

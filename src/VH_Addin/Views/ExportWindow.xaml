@@ -48,7 +48,8 @@
                         <Button x:Name="btnTabSelection" Content="Selectie" Style="{StaticResource LinkButton}" Click="BtnTab_Click" FontWeight="Bold" Margin="0,0,20,0"/>
                         <Button x:Name="btnTabSettings" Content="Instellingen" Style="{StaticResource LinkButton}" Click="BtnTab_Click" Opacity="0.5" Margin="0,0,20,0"/>
                         <Button x:Name="btnTabNaming" Content="Naamgeving" Style="{StaticResource LinkButton}" Click="BtnTab_Click" Opacity="0.5" Margin="0,0,20,0"/>
-                        <Button x:Name="btnTabOrder" Content="Volgorde" Style="{StaticResource LinkButton}" Click="BtnTab_Click" Opacity="0.5" Visibility="Collapsed"/>
+                        <Button x:Name="btnTabOrder" Content="Volgorde" Style="{StaticResource LinkButton}" Click="BtnTab_Click" Opacity="0.5" Margin="0,0,20,0" Visibility="Collapsed"/>
+                        <Button x:Name="btnTabDwgSettings" Content="DWG Instellingen" Style="{StaticResource LinkButton}" Click="BtnTab_Click" Opacity="0.5" Visibility="Collapsed"/>
                     </StackPanel>
                 </Border>
 
@@ -84,8 +85,28 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <Grid Margin="0,0,0,5">
-                                <TextBlock Text="Selecteer Sheets:" FontWeight="SemiBold" Foreground="#64748B" FontSize="11"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="Selecteer Sheets:" FontWeight="SemiBold" Foreground="#64748B" FontSize="11" Margin="0,0,10,0"/>
+                                    <!-- Search Box -->
+                                    <Border BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="4" Background="White" Width="200">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="🔍" VerticalAlignment="Center" Margin="5,0,5,0" Foreground="#94A3B8" FontSize="10"/>
+                                            <TextBox x:Name="txtSearch" Grid.Column="1" BorderThickness="0" Background="Transparent" 
+                                                     Padding="2" FontSize="11" VerticalContentAlignment="Center"
+                                                     TextChanged="TxtSearch_TextChanged" GotFocus="TxtSearch_GotFocus" LostFocus="TxtSearch_LostFocus"
+                                                     Foreground="#94A3B8" Text="Zoeken op nummer of naam..."/>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                                     <Button Content="Alles" Style="{StaticResource LinkButton}" Click="BtnSelectAll_Click"/>
                                     <TextBlock Text=" | " Foreground="#E2E8F0" VerticalAlignment="Center"/>
                                     <Button Content="Geen" Style="{StaticResource LinkButton}" Click="BtnSelectNone_Click"/>
@@ -111,11 +132,12 @@
                             </Border>
                         </Grid>
 
-                        <!-- Export Options -->
-                        <Border Grid.Row="2" Padding="20,5,20,15">
+                        <!-- Formats -->
+                        <Border Grid.Row="2" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="20,10">
                             <StackPanel Orientation="Horizontal">
-                                <CheckBox x:Name="chkExportPdf" Content="PDF Exporteren" IsChecked="True" VerticalAlignment="Center" Margin="0,0,20,0" Checked="ExportFormat_Changed" Unchecked="ExportFormat_Changed"/>
-                                <CheckBox x:Name="chkExportDwg" Content="DWG Exporteren" IsChecked="False" VerticalAlignment="Center" Checked="ExportFormat_Changed" Unchecked="ExportFormat_Changed"/>
+                                <TextBlock Text="Exporteren naar:" VerticalAlignment="Center" Margin="0,0,15,0" FontWeight="SemiBold" Foreground="#64748B" FontSize="11"/>
+                                <CheckBox x:Name="chkExportPdf" Content="PDF" IsChecked="True" VerticalAlignment="Center" Margin="0,0,20,0" Checked="ExportFormat_Changed" Unchecked="ExportFormat_Changed"/>
+                                <CheckBox x:Name="chkExportDwg" Content="DWG" IsChecked="False" VerticalAlignment="Center" Checked="ChkExportDwg_Changed" Unchecked="ChkExportDwg_Changed"/>
                             </StackPanel>
                         </Border>
                     </Grid>
@@ -317,6 +339,48 @@
                         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
                             <Button Content="Omhoog ↑" Click="BtnMoveSheetUp_Click" Padding="15,5" Margin="0,0,10,0" Background="#F1F5F9" BorderBrush="#E2E8F0"/>
                             <Button Content="Omlaag ↓" Click="BtnMoveSheetDown_Click" Padding="15,5" Background="#F1F5F9" BorderBrush="#E2E8F0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Tab: DWG Settings -->
+                    <Grid x:Name="gridTabDwgSettings" Visibility="Collapsed" Margin="20,10">
+                        <StackPanel>
+                            <TextBlock Text="DWG Export Instellingen" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,15"/>
+                            
+                            <GroupBox Header="Export Instellingen" Padding="10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="AutoCAD Versie" VerticalAlignment="Center" Margin="0,0,15,10"/>
+                                    <ComboBox Grid.Column="1" x:Name="cmbDwgVersion" Margin="0,0,0,10" Padding="5,2">
+                                        <ComboBoxItem Content="AutoCAD 2025" IsSelected="True"/>
+                                        <ComboBoxItem Content="AutoCAD 2018"/>
+                                        <ComboBoxItem Content="AutoCAD 2013"/>
+                                        <ComboBoxItem Content="AutoCAD 2010"/>
+                                    </ComboBox>
+
+                                    <TextBlock Grid.Row="1" Text="Coördinatenstelsel" VerticalAlignment="Center" Margin="0,0,15,10"/>
+                                    <ComboBox Grid.Row="1" Grid.Column="1" x:Name="cmbDwgCoordinates" Margin="0,0,0,10" Padding="5,2">
+                                        <ComboBoxItem Content="Interne Oorsprong" IsSelected="True"/>
+                                        <ComboBoxItem Content="Gedeelde Coördinaten"/>
+                                    </ComboBox>
+
+                                    <TextBlock Grid.Row="2" Text="Eenheid" VerticalAlignment="Center" Margin="0,0,15,10"/>
+                                    <ComboBox Grid.Row="2" Grid.Column="1" x:Name="cmbDwgUnits" Padding="5,2">
+                                        <ComboBoxItem Content="Millimeters" IsSelected="True"/>
+                                        <ComboBoxItem Content="Meters"/>
+                                        <ComboBoxItem Content="Centimeters"/>
+                                    </ComboBox>
+                                </Grid>
+                            </GroupBox>
                         </StackPanel>
                     </Grid>
                 </Grid>
