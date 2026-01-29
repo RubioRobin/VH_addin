@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>VH Tools</Name>
+    <Assembly>VH_Tools.dll</Assembly>
+    <AddInId>F7E2D9C4-3B8A-4F1E-9D6C-2A5B8E4F7C91</AddInId>
+    <FullClassName>VH_Addin.App</FullClassName>
+    <ClientId>F7E2D9C4-3B8A-4F1E-9D6C-2A5B8E4F7C91</ClientId>
+    <VendorId>VH</VendorId>
+    <VendorDescription>VH Engineering</VendorDescription>
+    <LargeImage>Resources\VH_Icon32.png</LargeImage>
+    <Image>Resources\VH_Icon32.png</Image>
+  </AddIn>
+</RevitAddIns>

@@ -1,0 +1,355 @@
+<!--
+  Auteur: Robin Manintveld
+  Datum: 22-01-2026
+  Omschrijving: Venster voor het instellen van de kozijnstaat-configuratie (VH Tools)
+-->
+
+<Window x:Class="VH_Addin.Views.KozijnstaatSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Kozijnstaat"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Width="1000"
+        SizeToContent="Height"
+        ResizeMode="NoResize"
+        FontFamily="Segoe UI">
+
+  <Window.Resources>
+    <!-- Colors matching ViewDuplicator -->
+    <SolidColorBrush x:Key="T" Color="#2B2B2B"/>
+    <SolidColorBrush x:Key="Gold" Color="#B2996B"/>
+    <SolidColorBrush x:Key="Neutral" Color="#E5E7EB"/>
+    <SolidColorBrush x:Key="NeutralText" Color="#333333"/>
+    <SolidColorBrush x:Key="NeutralBorder" Color="#D1D5DB"/>
+
+    <!-- Card Style -->
+    <Style x:Key="Card" TargetType="Border">
+      <Setter Property="Background" Value="White"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Gold}"/>
+      <Setter Property="BorderThickness" Value="1.5"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Padding" Value="16"/>
+      <Setter Property="Margin" Value="0,0,0,16"/>
+    </Style>
+
+    <!-- Label Style -->
+    <Style x:Key="LabelStyle" TargetType="TextBlock">
+      <Setter Property="Foreground" Value="#6B7280"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Margin" Value="0,0,12,0"/>
+    </Style>
+
+    <!-- TextBox Style -->
+    <Style x:Key="InputBox" TargetType="TextBox">
+      <Setter Property="Height" Value="32"/>
+      <Setter Property="Padding" Value="8,6"/>
+      <Setter Property="Background" Value="White"/>
+      <Setter Property="BorderBrush" Value="{StaticResource NeutralBorder}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="FontSize" Value="13"/>
+    </Style>
+
+    <!-- ComboBox Style -->
+    <Style x:Key="InputCombo" TargetType="ComboBox">
+      <Setter Property="Height" Value="32"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="Margin" Value="0,2"/>
+    </Style>
+
+    <!-- Primary Button (Gold) -->
+    <Style x:Key="BtnGold" TargetType="Button">
+      <Setter Property="Background" Value="{StaticResource Gold}"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="Height" Value="40"/>
+      <Setter Property="Padding" Value="24,10"/>
+      <Setter Property="MinWidth" Value="140"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="border"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="Black"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="{TemplateBinding Padding}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="border" Property="Background" Value="#A08D61"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Secondary Button (White) -->
+    <Style x:Key="BtnSecondaryWhite" TargetType="Button">
+      <Setter Property="Background" Value="White"/>
+      <Setter Property="Foreground" Value="Black"/>
+      <Setter Property="Height" Value="40"/>
+      <Setter Property="Padding" Value="24,10"/>
+      <Setter Property="MinWidth" Value="140"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="border"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="Black"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="{TemplateBinding Padding}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="border" Property="Background" Value="#F8F8F8"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
+
+  <Grid>
+    <!-- Main Container with Shadow -->
+    <Border Background="White"
+            CornerRadius="16"
+            Margin="24,24,24,88">
+      <Border.Effect>
+        <DropShadowEffect Color="Black" Direction="270" ShadowDepth="2" BlurRadius="20" Opacity="0.15"/>
+      </Border.Effect>
+
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>  <!-- Draggable Title Bar -->
+          <RowDefinition Height="Auto"/>     <!-- Content -->
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" 
+                Background="#F8FAFC"
+                CornerRadius="16,16,0,0"
+                Padding="24,16"
+                MouseDown="TitleBar_MouseDown">
+          <TextBlock Text="Kozijnstaat"
+                     FontSize="18"
+                     FontWeight="SemiBold"
+                     Foreground="{StaticResource T}"
+                     VerticalAlignment="Center"/>
+        </Border>
+
+        <StackPanel Grid.Row="1" Margin="24,24,24,24">
+            <!-- Blad & Elementen -->
+            <Border Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="Blad &amp; Elementen" FontWeight="Bold" Margin="0,0,0,16" Foreground="{StaticResource T}"/>
+
+                <Grid Margin="0,0,0,12">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="Bladformaat:"/>
+                  <ComboBox Grid.Column="1" x:Name="cbFormat" Style="{StaticResource InputCombo}" SelectionChanged="CbFormat_SelectionChanged">
+                    <ComboBoxItem Content="A0"/>
+                    <ComboBoxItem Content="A1" IsSelected="True"/>
+                    <ComboBoxItem Content="A2"/>
+                    <ComboBoxItem Content="A3"/>
+                    <ComboBoxItem Content="A4"/>
+                    <ComboBoxItem Content="Custom"/>
+                  </ComboBox>
+                </Grid>
+
+                <Grid x:Name="gridCustomSize" Visibility="Collapsed" Margin="0,0,0,12">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="Breedte:"/>
+                  <TextBox Grid.Column="1" x:Name="tbCustomWidth" Style="{StaticResource InputBox}"/>
+                  <TextBlock Grid.Column="3" Style="{StaticResource LabelStyle}" Text="Hoogte:"/>
+                  <TextBox Grid.Column="4" x:Name="tbCustomHeight" Style="{StaticResource InputBox}"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="Bladoriëntatie:"/>
+                  <ComboBox Grid.Column="1" x:Name="cbOrientation" Style="{StaticResource InputCombo}">
+                    <ComboBoxItem Content="Liggend" IsSelected="True"/>
+                    <ComboBoxItem Content="Staand"/>
+                  </ComboBox>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="Aanzicht:"/>
+                  <ComboBox Grid.Column="1" x:Name="cbViewType" Style="{StaticResource InputCombo}">
+                    <ComboBoxItem Content="Back" IsSelected="True"/>
+                    <ComboBoxItem Content="Front"/>
+                  </ComboBox>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="Elementtype:"/>
+                  <ComboBox Grid.Column="1" x:Name="cbElementFilter" SelectionChanged="CbElementFilter_SelectionChanged" Style="{StaticResource InputCombo}">
+                    <ComboBoxItem Content="Kozijnen" IsSelected="True"/>
+                    <ComboBoxItem Content="Deuren"/>
+                    <ComboBoxItem Content="Beide"/>
+                  </ComboBox>
+                </Grid>
+
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="Assembly Code filter:"/>
+                  <TextBox Grid.Column="1" x:Name="tbAssemblyCode" Style="{StaticResource InputBox}" Text="31." TextChanged="TbAssemblyCode_TextChanged" ToolTip="Leeg laten voor alle types, of filter op Assembly Code"/>
+                </Grid>
+              </StackPanel>
+            </Border>
+
+            <!-- Layout -->
+            <Border Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="Layout" FontWeight="Bold" Margin="0,0,0,16" Foreground="{StaticResource T}"/>
+
+                <Grid Margin="0,0,0,12">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="Afstand tussen rijen:"/>
+                  <TextBox Grid.Column="1" x:Name="tbRowPitch" Style="{StaticResource InputBox}"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="Hoogte-offset hulplijn:"/>
+                  <TextBox Grid.Column="1" x:Name="tbLineOffset" Style="{StaticResource InputBox}"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="Afstand tussen kozijnen:"/>
+                  <TextBox Grid.Column="1" x:Name="tbGap" Style="{StaticResource InputBox}"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="Minimale afstand BACK↔FP:"/>
+                  <TextBox Grid.Column="1" x:Name="tbMinBackGap" Style="{StaticResource InputBox}"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="Marge links/rechts/boven:"/>
+                  <TextBox Grid.Column="1" x:Name="tbMarginBLR" Style="{StaticResource InputBox}"/>
+                </Grid>
+
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="Marge onder:"/>
+                  <TextBox Grid.Column="1" x:Name="tbMarginBottom" Style="{StaticResource InputBox}"/>
+                </Grid>
+              </StackPanel>
+            </Border>
+
+            <!-- Opties -->
+            <Border Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="Opties" FontWeight="Bold" Margin="0,0,0,16" Foreground="{StaticResource T}"/>
+                
+                <!-- <CheckBox x:Name="chkPlaceDimensions" Content="Maatvoering plaatsen" Margin="0,4" IsChecked="True"/> -->
+                <CheckBox x:Name="chkOffsetDims" Content="Maatlijnen op offset plaatsen" Margin="0,4" IsChecked="True"/>
+                <CheckBox x:Name="chkUseHeights" Content="Pas instance-hoogtes toe" Margin="0,4" IsChecked="True"/>
+
+                <CheckBox x:Name="chkRefPlanes" Content="Referentievlakken plaatsen" Margin="0,4" Checked="ChkRefPlanes_Checked" Unchecked="ChkRefPlanes_Unchecked" Foreground="{StaticResource T}"/>
+
+                <Grid x:Name="gridRefPlaneOffsets" Visibility="Collapsed" Margin="24,8,0,0">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition Width="24"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="Links:" VerticalAlignment="Center" Foreground="#6B7280" FontSize="13"/>
+                  <TextBox Grid.Column="1" x:Name="tbRefLeft" Style="{StaticResource InputBox}" Width="80" HorizontalAlignment="Left"/>
+                  <TextBlock Grid.Column="3" Text="Boven:" VerticalAlignment="Center" Foreground="#6B7280" FontSize="13"/>
+                  <TextBox Grid.Column="4" x:Name="tbRefTop" Style="{StaticResource InputBox}" Width="80" HorizontalAlignment="Left"/>
+                </Grid>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- Floating Action Buttons -->
+    <StackPanel Orientation="Horizontal" 
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Bottom"
+                Margin="0,0,24,24">
+      <TextBlock x:Name="tbCountStatus" Text="Beschikbaar: ..." 
+                 VerticalAlignment="Center"
+                 Margin="0,0,24,0"
+                 Foreground="#6B7280" 
+                 FontStyle="Italic"/>
+      
+      <Button x:Name="btnCancel" 
+              Content="Annuleren" 
+              Click="BtnCancel_Click"
+              IsCancel="True"
+              Style="{StaticResource BtnSecondaryWhite}"
+              Margin="0,0,12,0"/>
+
+      <Button x:Name="btnRun" 
+              Content="Uitvoeren" 
+              Click="BtnRun_Click"
+              Style="{StaticResource BtnGold}"/>
+    </StackPanel>
+  </Grid>
+</Window>

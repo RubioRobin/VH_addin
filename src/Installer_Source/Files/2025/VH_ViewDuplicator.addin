@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>VH View Duplicator</Name>
+    <Assembly>VH_ViewDuplicator.dll</Assembly>
+    <FullClassName>VH_Addin.App</FullClassName>
+    <ClientId>50e346bb-44f4-43e6-b3a2-866b28aeab45</ClientId>
+    <VendorId>VH</VendorId>
+    <VendorDescription>VH Engineering</VendorDescription>
+    <LargeImage>Resources\VH_Icon32.png</LargeImage>
+    <Image>Resources\VH_Icon32.png</Image>
+  </AddIn>
+</RevitAddIns>

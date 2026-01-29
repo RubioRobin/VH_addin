@@ -1,0 +1,13 @@
+<Window x:Class="VH_Addin.Views.SheetRenamerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Sheet Renamer" 
+        Width="420" Height="600"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True"
+        Background="Transparent">
+    <Grid>
+        <!-- Background/Border is handled in code-behind for the premium island look -->
+    </Grid>
+</Window>

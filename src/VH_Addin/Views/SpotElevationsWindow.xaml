@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Auteur: Robin Manintveld
+  Datum: 22-01-2026
+  Omschrijving: Venster voor het aanpassen van spot elevation weergave (VH Tools)
+-->
+
+<Window x:Class="VH_Addin.Views.SpotElevationsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Spot Elevations Override" 
+        Width="520" Height="260"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True"
+        Background="Transparent">
+    <Grid Margin="0">
+    </Grid>
+</Window>

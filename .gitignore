@@ -1,0 +1,27 @@
+# Build artifacts
+bin/
+obj/
+*.user
+*.suo
+*.cache
+
+# NuGet
+packages/
+*.nupkg
+
+# Visual Studio
+.vs/
+*.sln.docstates
+
+# Revit
+*.log
+*.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+*.tmp
+*.bak
+*~

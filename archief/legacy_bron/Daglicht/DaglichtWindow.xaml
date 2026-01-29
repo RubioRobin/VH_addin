@@ -1,0 +1,155 @@
+<Window x:Class="VH_DaglichtPlugin.DaglichtWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="VH Daglichttool"
+        Height="420"
+        Width="520"
+        WindowStartupLocation="CenterScreen"
+        Background="#D5C7AC"
+        ResizeMode="CanResizeWithGrip">
+
+    <Window.Resources>
+        <Style x:Key="RoundedButton" TargetType="Button">
+            <Setter Property="Padding" Value="24,10"/>
+            <Setter Property="MinWidth" Value="110"/>
+            <Setter Property="MinHeight" Value="36"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="6"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="4,0,4,0"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Main content island -->
+        <Border Grid.Row="0"
+                Background="White"
+                CornerRadius="10"
+                Padding="14"
+                BorderBrush="#CDC4B2"
+                BorderThickness="1">
+            <StackPanel>
+                <TextBlock Text="Selectie"
+                           FontWeight="Bold"
+                           Foreground="#333333"
+                           Margin="0,0,0,10"/>
+
+                <Border Background="#F5F5F5"
+                        CornerRadius="8"
+                        Padding="8"
+                        BorderBrush="#E0DED6"
+                        BorderThickness="1"
+                        Margin="0,0,0,10">
+                    <StackPanel>
+                        <RadioButton x:Name="rbActiveView"
+                                     Content="Kozijnen in actieve view"
+                                     Margin="0,0,0,4"
+                                     IsChecked="True"/>
+                        <RadioButton x:Name="rbCurrentLevel"
+                                     Content="Kozijnen op huidig level"
+                                     Margin="0,0,0,4"/>
+                        <RadioButton x:Name="rbSelection"
+                                     Content="Alleen huidige selectie"
+                                     Margin="0,0,0,4"/>
+                        <RadioButton x:Name="rbAllModel"
+                                     Content="Alle kozijnen in model"/>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Opties"
+                           FontWeight="Bold"
+                           Foreground="#333333"
+                           Margin="0,4,0,6"/>
+
+                <Border Background="#F5F5F5"
+                        CornerRadius="8"
+                        Padding="8"
+                        BorderBrush="#E0DED6"
+                        BorderThickness="1">
+                    <StackPanel>
+                        <CheckBox x:Name="cbDrawLines"
+                                  Content="Lijnen tekenen (waaier + β- en X/A-lijnen)"
+                                  IsChecked="True"/>
+
+                        <CheckBox x:Name="cbDoAlpha"
+                                  Content="α berekenen"
+                                  Margin="0,4,0,0"
+                                  IsChecked="True"/>
+
+                        <CheckBox x:Name="cbDoBeta"
+                                  Content="β berekenen"
+                                  Margin="0,4,0,0"
+                                  IsChecked="True"/>
+
+                        <CheckBox x:Name="cbDoGlass"
+                                  Content="Glasoppervlakte berekenen"
+                                  Margin="0,4,0,0"
+                                  IsChecked="True"/>
+
+                        <CheckBox x:Name="cbOnlyVG"
+                                  Content="Alleen kozijnen die grenzen aan VG-gebieden (Areas)"
+                                  Margin="0,4,0,0"
+                                  IsChecked="False"/>
+
+                        <CheckBox x:Name="cbDoExport"
+                                  Content="Resultaten exporteren naar CSV (Bureaublad)"
+                                  Margin="0,4,0,0"
+                                  IsChecked="True"/>
+                        
+                        <Separator Margin="0,8,0,8"/>
+                        
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Standaard Raamhout (mm):" 
+                                       VerticalAlignment="Center" 
+                                       Margin="0,0,10,0"/>
+                            <TextBox x:Name="tbSashWidth"
+                                     Width="50"
+                                     Text="69"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Bottom button bar -->
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,8,0,0">
+            <Button x:Name="btnCancel"
+                    Content="Annuleren"
+                    Margin="0,8,8,0"
+                    Background="#E5E7EB"
+                    BorderBrush="#D1D5DB"
+                    BorderThickness="1"
+                    Style="{StaticResource RoundedButton}"
+                    Click="BtnCancel_Click"/>
+            <Button x:Name="btnRun"
+                    Content="Berekenen"
+                    Margin="0,8,8,0"
+                    Background="#B2996B"
+                    Foreground="White"
+                    BorderBrush="#A4895C"
+                    BorderThickness="1"
+                    FontWeight="Bold"
+                    Style="{StaticResource RoundedButton}"
+                    Click="BtnRun_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

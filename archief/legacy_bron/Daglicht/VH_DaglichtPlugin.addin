@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>VH Daglichttool</Name>
+    <Assembly>VH_DaglichtPlugin\VH_DaglichtPlugin.dll</Assembly>
+    <AddInId>A8F3C2D1-5E6B-4A7C-9D8E-1F2A3B4C5D6E</AddInId>
+    <FullClassName>VH_DaglichtPlugin.Application</FullClassName>
+    <VendorId>VH</VendorId>
+    <VendorDescription>VH Engineering</VendorDescription>
+  </AddIn>
+</RevitAddIns>

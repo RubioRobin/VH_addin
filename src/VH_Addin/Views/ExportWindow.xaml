@@ -1,0 +1,343 @@
+<Window x:Class="VH_Addin.Views.ExportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Export Tools" Height="600" Width="650"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <Style x:Key="LinkButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#B2996B"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock Text="{TemplateBinding Content}" TextDecorations="None"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Margin="10">
+        <Border Background="White" CornerRadius="15" BorderBrush="#E2E8F0" BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="4" BlurRadius="15" Opacity="0.15"/>
+            </Border.Effect>
+            
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Header -->
+                    <RowDefinition Height="Auto"/> <!-- Tabs -->
+                    <RowDefinition Height="*"/>    <!-- Content (Tabbed) -->
+                    <RowDefinition Height="Auto"/> <!-- Progress -->
+                    <RowDefinition Height="Auto"/> <!-- Buttons -->
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <Border Grid.Row="0" Background="#F8FAFC" CornerRadius="15,15,0,0" Padding="20,15" MouseDown="TitleBar_MouseDown">
+                    <TextBlock Text="Export Sheets (PDF &amp; DWG)" FontSize="18" FontWeight="Bold" Foreground="#1E293B"/>
+                </Border>
+
+                <!-- Tabs -->
+                <Border Grid.Row="1" Background="White" Padding="20,5,20,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="btnTabSelection" Content="Selectie" Style="{StaticResource LinkButton}" Click="BtnTab_Click" FontWeight="Bold" Margin="0,0,20,0"/>
+                        <Button x:Name="btnTabSettings" Content="Instellingen" Style="{StaticResource LinkButton}" Click="BtnTab_Click" Opacity="0.5" Margin="0,0,20,0"/>
+                        <Button x:Name="btnTabNaming" Content="Naamgeving" Style="{StaticResource LinkButton}" Click="BtnTab_Click" Opacity="0.5" Margin="0,0,20,0"/>
+                        <Button x:Name="btnTabOrder" Content="Volgorde" Style="{StaticResource LinkButton}" Click="BtnTab_Click" Opacity="0.5" Visibility="Collapsed"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Content Area -->
+                <Grid Grid.Row="2">
+                    <!-- Tab: Selection -->
+                    <Grid x:Name="gridTabSelection" Visibility="Visible">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/> <!-- Folder -->
+                            <RowDefinition Height="*"/>    <!-- List -->
+                            <RowDefinition Height="Auto"/> <!-- Formatting/Format options -->
+                        </Grid.RowDefinitions>
+
+                        <!-- Folder Selection -->
+                        <Border Grid.Row="0" Padding="20,10,20,5">
+                            <StackPanel>
+                                <TextBlock Text="Opslaglocatie:" FontWeight="SemiBold" Foreground="#64748B" FontSize="11" Margin="0,0,0,5"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="txtFolderPath" Padding="8" BorderBrush="#E2E8F0" BorderThickness="1" IsReadOnly="True" FontSize="12" VerticalContentAlignment="Center"/>
+                                    <Button Grid.Column="1" Content="Bladeren..." Margin="5,0,0,0" Padding="15,5" Background="White" BorderBrush="#E2E8F0" Click="BtnBrowse_Click"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Sheet List -->
+                        <Grid Grid.Row="1" Margin="20,10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid Margin="0,0,0,5">
+                                <TextBlock Text="Selecteer Sheets:" FontWeight="SemiBold" Foreground="#64748B" FontSize="11"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Content="Alles" Style="{StaticResource LinkButton}" Click="BtnSelectAll_Click"/>
+                                    <TextBlock Text=" | " Foreground="#E2E8F0" VerticalAlignment="Center"/>
+                                    <Button Content="Geen" Style="{StaticResource LinkButton}" Click="BtnSelectNone_Click"/>
+                                </StackPanel>
+                            </Grid>
+                            <Border Grid.Row="1" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="5">
+                                <DataGrid x:Name="dgSheets" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" 
+                                          BorderThickness="0" Background="Transparent" GridLinesVisibility="None" SelectionMode="Single">
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Width="40">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="Nummer" Binding="{Binding SheetNumber}" Width="100"/>
+                                        <DataGridTextColumn Header="Naam" Binding="{Binding Name}" Width="*"/>
+                                        <DataGridTextColumn Header="Formaat" Binding="{Binding DetectedSize}" Width="60"/>
+                                        <DataGridTextColumn Header="Orient." Binding="{Binding Orientation}" Width="60"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Border>
+                        </Grid>
+
+                        <!-- Export Options -->
+                        <Border Grid.Row="2" Padding="20,5,20,15">
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox x:Name="chkExportPdf" Content="PDF Exporteren" IsChecked="True" VerticalAlignment="Center" Margin="0,0,20,0" Checked="ExportFormat_Changed" Unchecked="ExportFormat_Changed"/>
+                                <CheckBox x:Name="chkExportDwg" Content="DWG Exporteren" IsChecked="False" VerticalAlignment="Center" Checked="ExportFormat_Changed" Unchecked="ExportFormat_Changed"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Tab: Settings -->
+                    <Grid x:Name="gridTabSettings" Visibility="Collapsed" Margin="20,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/> <!-- Combined PDF Toggle -->
+                            <RowDefinition Height="Auto"/> <!-- Row 1 -->
+                            <RowDefinition Height="Auto"/> <!-- Row 2 -->
+                            <RowDefinition Height="*"/>    <!-- Row 3 -->
+                        </Grid.RowDefinitions>
+
+                        <!-- Combined PDF Toggle Card -->
+                        <Border Grid.Row="0" Grid.ColumnSpan="2" Background="#F1F5F9" CornerRadius="10" Padding="15,10" Margin="0,0,0,15" BorderBrush="#CBD5E1" BorderThickness="1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Samenvoegen tot één PDF" FontWeight="Bold" Foreground="#1E293B" FontSize="14"/>
+                                    <TextBlock Text="Exporteer alle geselecteerde sheets in één enkel PDF bestand." Foreground="#64748B" FontSize="11"/>
+                                </StackPanel>
+                                <CheckBox x:Name="chkCombinePdf" Grid.Column="1" IsChecked="False" VerticalAlignment="Center" Margin="10,0,0,0" Checked="ChkCombinePdf_Changed" Unchecked="ChkCombinePdf_Changed">
+                                    <CheckBox.LayoutTransform>
+                                        <ScaleTransform ScaleX="1.8" ScaleY="1.8"/>
+                                    </CheckBox.LayoutTransform>
+                                </CheckBox>
+                            </Grid>
+                        </Border>
+
+                        <!-- Left Column -->
+                        <GroupBox Grid.Column="0" Grid.Row="1" Header="Paper Placement" Margin="0,0,10,10" Padding="10">
+                            <StackPanel>
+                                <RadioButton x:Name="rbCenter" Content="Center" IsChecked="True" GroupName="Placement" Margin="0,0,0,5"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <RadioButton x:Name="rbOffset" Content="Offset from corner" GroupName="Placement" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="cmbMargin" Width="120" Margin="10,0,0,0" Padding="5,2">
+                                        <ComboBoxItem Content="No Margin" IsSelected="True"/>
+                                        <ComboBoxItem Content="Printer Limit"/>
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="22,0,0,0">
+                                    <TextBlock Text="X - " VerticalAlignment="Center" FontSize="11"/>
+                                    <TextBox x:Name="txtXOffset" Text="0.00" Width="60" Padding="2" Margin="0,0,5,0"/>
+                                    <TextBlock Text="mm" VerticalAlignment="Center" FontSize="11" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Y - " VerticalAlignment="Center" FontSize="11"/>
+                                    <TextBox x:Name="txtYOffset" Text="0.00" Width="60" Padding="2" Margin="0,0,5,0"/>
+                                    <TextBlock Text="mm" VerticalAlignment="Center" FontSize="11"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Grid.Column="0" Grid.Row="2" Header="Zoom" Margin="0,0,10,10" Padding="10">
+                            <StackPanel>
+                                <RadioButton x:Name="rbZoomFit" Content="Fit to Page" GroupName="Zoom" Margin="0,0,0,8"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="rbZoomPercent" Content="Zoom" IsChecked="True" GroupName="Zoom" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="txtZoomPercent" Text="100" Width="50" Margin="10,0,5,0" Padding="2" VerticalAlignment="Center" IsEnabled="{Binding ElementName=rbZoomPercent, Path=IsChecked}"/>
+                                    <TextBlock Text="% Size" VerticalAlignment="Center" FontSize="11"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Right Column -->
+                        <GroupBox Grid.Column="1" Grid.Row="1" Header="Hidden Line Views" Margin="0,0,0,10" Padding="10">
+                            <StackPanel>
+                                <TextBlock Text="Remove Lines Using" Margin="0,0,0,8" Foreground="#64748B"/>
+                                <RadioButton x:Name="rbVector" Content="Vector Processing" IsChecked="True" GroupName="Processing" Margin="0,0,0,5"/>
+                                <RadioButton x:Name="rbRaster" Content="Raster Processing" GroupName="Processing"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Grid.Column="1" Grid.Row="2" Header="Appearance" Margin="0,0,0,10" Padding="10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="Raster Quality" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                                <ComboBox Grid.Column="1" x:Name="cmbRasterQuality" Margin="0,0,0,10" Padding="5,2">
+                                    <ComboBoxItem Content="Low"/>
+                                    <ComboBoxItem Content="Medium"/>
+                                    <ComboBoxItem Content="High"/>
+                                    <ComboBoxItem Content="Presentation" IsSelected="True"/>
+                                </ComboBox>
+
+                                <TextBlock Grid.Row="1" Text="Colors" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <ComboBox Grid.Row="1" Grid.Column="1" x:Name="cmbColorMode" Padding="5,2">
+                                    <ComboBoxItem Content="Color" IsSelected="True"/>
+                                    <ComboBoxItem Content="Black Line"/>
+                                    <ComboBoxItem Content="Grayscale"/>
+                                </ComboBox>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- Other Options -->
+                        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10,0,0">
+                            <CheckBox x:Name="chkHideUnreferencedTags" Content="Verberg onverwezen view tags" IsChecked="True" Margin="0,0,0,8"/>
+                            <CheckBox x:Name="chkMaskCoincidentLines" Content="Coïncidente lijnen maskeren" IsChecked="True" Margin="0,0,0,8"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Tab: Naming -->
+                    <Grid x:Name="gridTabNaming" Visibility="Collapsed" Margin="20,10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.ColumnSpan="2" Text="Bestandsnaam Samenstellen" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,10"/>
+
+                        <!-- Available Parameters -->
+                        <GroupBox Grid.Row="1" Grid.Column="0" Header="Beschikbare Parameters" Margin="0,0,10,0" Padding="5">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <ListBox x:Name="listAvailableParams" DisplayMemberPath="Name" Margin="0,0,0,5"/>
+                                <StackPanel Grid.Row="1">
+                                    <Button Content="Voeg Parameter Toe" Click="BtnAddParam_Click" Padding="5,2" Background="#F1F5F9" BorderBrush="#E2E8F0" Margin="0,0,0,5"/>
+                                    <Button x:Name="btnAddDate" Content="Dag van vandaag (JJMMDD)" Click="BtnAddDate_Click" Padding="5,2" Background="#F1F5F9" BorderBrush="#E2E8F0"/>
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- Naming Rule -->
+                        <GroupBox Grid.Row="1" Grid.Column="1" Header="Naamgeving Regel" Padding="5">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <ListBox x:Name="listNamingRule" DisplayMemberPath="DisplayName" Margin="0,0,0,5"/>
+                                <StackPanel Grid.Row="1">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                        <CheckBox x:Name="chkAutoSeparator" Content="Auto Scheiding:" VerticalAlignment="Center" Checked="ExportFormat_Changed" Unchecked="ExportFormat_Changed"/>
+                                        <TextBox x:Name="txtAutoSeparator" Text="-" Width="30" Margin="5,0,0,0" Padding="2" TextChanged="ExportFormat_Changed"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="↑" Click="BtnMoveUp_Click" Width="30" Margin="0,0,5,0" ToolTip="Omhoog"/>
+                                        <Button Content="↓" Click="BtnMoveDown_Click" Width="30" Margin="0,0,5,0" ToolTip="Omlaag"/>
+                                        <Button Content="Verwijder" Click="BtnRemovePart_Click" Padding="5,2" Background="#FEE2E2" Foreground="#991B1B" BorderBrush="#FECACA"/>
+                                    </StackPanel>
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="txtSeparator" Text="_" Padding="5,2" VerticalAlignment="Center"/>
+                                        <Button Grid.Column="1" Content="Voeg Tekst Toe" Click="BtnAddText_Click" Margin="5,0,0,0" Padding="5,2" Background="#F1F5F9" BorderBrush="#E2E8F0"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- Preview -->
+                        <GroupBox Grid.Row="2" Grid.ColumnSpan="2" Header="Voorbeeld" Margin="0,10,0,0" Padding="10">
+                            <TextBlock x:Name="txtNamingPreview" Text="A001_Begane Grond.pdf" FontStyle="Italic" Foreground="#64748B"/>
+                        </GroupBox>
+                    </Grid>
+
+                    <!-- Tab: Order -->
+                    <Grid x:Name="gridTabOrder" Visibility="Collapsed" Margin="20,10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Volgorde voor samengestelde PDF" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,10"/>
+                        <Border Grid.Row="1" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="5">
+                            <ListBox x:Name="listOrderedSheets" BorderThickness="0" Background="Transparent">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding SheetNumber}" FontWeight="Bold" Width="80" Margin="5"/>
+                                            <TextBlock Text="{Binding Name}" Margin="5"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                            <Button Content="Omhoog ↑" Click="BtnMoveSheetUp_Click" Padding="15,5" Margin="0,0,10,0" Background="#F1F5F9" BorderBrush="#E2E8F0"/>
+                            <Button Content="Omlaag ↓" Click="BtnMoveSheetDown_Click" Padding="15,5" Background="#F1F5F9" BorderBrush="#E2E8F0"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+
+                <!-- Progress -->
+                <Border Grid.Row="4" x:Name="panelProgress" Visibility="Collapsed" Padding="20,0,20,10">
+                    <StackPanel>
+                        <ProgressBar x:Name="pbProgress" Height="15" Minimum="0" Maximum="100"/>
+                        <TextBlock x:Name="txtProgress" Text="Bezig met exporteren..." FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,3,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Buttons -->
+                <Border Grid.Row="5" Background="#F8FAFC" CornerRadius="0,0,15,15" Padding="20,15">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="btnCancel" Content="Annuleren" Click="BtnCancel_Click" Margin="0,0,10,0" Padding="20,8" Background="White" BorderBrush="#E2E8F0"/>
+                        <Button x:Name="btnExport" Content="Exporteren" Click="BtnExport_Click" Padding="25,8" Background="#B2996B" Foreground="White" FontWeight="Bold" BorderThickness="0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+    
+</Window>
