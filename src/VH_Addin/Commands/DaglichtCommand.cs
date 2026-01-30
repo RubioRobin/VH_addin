@@ -141,7 +141,7 @@ namespace VH_Tools.Commands
 
         private bool IsWindow(FamilyInstance fi)
         {
-            return fi.Category != null && fi.Category.Id.Value == (long)BuiltInCategory.OST_Windows;
+            return fi.Category != null && fi.Category.Id.IntegerValue == (long)BuiltInCategory.OST_Windows;
         }
 
         private List<FamilyInstance> CollectWindows(Document doc, UIDocument uidoc, DaglichtOptions options)

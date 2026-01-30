@@ -1,0 +1,324 @@
+<Window x:Class="ParaManager.UI.FamilyTransferWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Style="{DynamicResource ParaManagerWindow}"
+        Title="Family Transfer" 
+        Width="800" 
+        Height="600">
+    
+    <Window.Resources>
+        <ResourceDictionary Source="pack://application:,,,/ParaManager;component/Resources/Styles.xaml"/>
+    </Window.Resources>
+
+    <Border Background="{StaticResource VHGold}" CornerRadius="12">
+        <Border Background="{StaticResource VHBeige}" Margin="2" CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <Border Grid.Row="0" Background="{StaticResource VHDark}" CornerRadius="10,10,0,0"
+                        MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                    <Grid Height="80" Margin="24,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <!-- Title and Close -->
+                        <Grid Grid.Row="0" Height="40">
+                             <TextBlock Text="FAMILY TRANSFER" 
+                                      Style="{StaticResource WindowTitle}"
+                                      VerticalAlignment="Center"/>
+                            
+                            <Button HorizontalAlignment="Right" 
+                                    Background="Transparent" 
+                                    BorderThickness="0"
+                                    Cursor="Hand"
+                                    Click="CloseButton_Click"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="✕" Foreground="White" FontSize="20" FontWeight="Bold"/>
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <ContentPresenter/>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Opacity" Value="0.7"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </Grid>
+                        
+                        <!-- Mode Navigation -->
+                        <WrapPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,0,0,10">
+                            <RadioButton x:Name="rbModeTransfer" Content="FAMILY TRANSFER" 
+                                         Style="{StaticResource ToggleButtonPill}" 
+                                         IsChecked="True" Width="150"
+                                         Checked="Mode_Checked"/>
+                            <RadioButton x:Name="rbModeImport" Content="EXCEL IMPORT" 
+                                         Style="{StaticResource ToggleButtonPill}" 
+                                         Width="150" Margin="10,0"
+                                         Checked="Mode_Checked"/>
+                            <RadioButton x:Name="rbModeExport" Content="EXCEL EXPORT" 
+                                         Style="{StaticResource ToggleButtonPill}" 
+                                         Width="150"
+                                         Checked="Mode_Checked"/>
+                        </WrapPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Content Area -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <Border Padding="24">
+                        <StackPanel>
+                        
+                        <!-- Configuration Card -->
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <!-- Source Selection (Dynamic) -->
+                                <Grid>
+                                    <!-- Family Source (Visible in Transfer & Export) -->
+                                    <GroupBox x:Name="grpSourceFamily" Header="SOURCE FAMILY" Style="{StaticResource ModernGroupBox}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox x:Name="txtSourceFamily" 
+                                                     Grid.Column="0" Grid.ColumnSpan="2"
+                                                     Style="{StaticResource ModernTextBox}" 
+                                                     IsReadOnly="True"
+                                                     Margin="0,0,12,0"/>
+                                            
+                                            <Button Grid.Column="2" Content="Pick Family" 
+                                                    Style="{StaticResource SecondaryButton}" 
+                                                    Click="SelectSourceFamily_Click"/>
+                                        </Grid>
+                                    </GroupBox>
+                                    
+                                    <!-- Excel Source (Visible in Import only) -->
+                                    <GroupBox x:Name="grpExcelSource" Header="SOURCE EXCEL" Style="{StaticResource ModernGroupBox}" Visibility="Collapsed">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox x:Name="txtSourceExcel" 
+                                                     Grid.Column="0" Grid.ColumnSpan="2"
+                                                     Style="{StaticResource ModernTextBox}" 
+                                                     IsReadOnly="True"
+                                                     Margin="0,0,12,0"
+                                                     Text="No file selected"/>
+                                            
+                                            <Button Grid.Column="2" Content="Browse Excel..." 
+                                                    Style="{StaticResource SecondaryButton}" 
+                                                    Click="BrowseExcel_Click"/>
+                                        </Grid>
+                                    </GroupBox>
+                                </Grid>
+
+                                <!-- Parameters List -->
+                                <GroupBox x:Name="grpParameters" Header="SELECT PARAMETERS" Style="{StaticResource ModernGroupBox}">
+                                    <StackPanel>
+                                        <!-- Search Bar -->
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="🔍" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="14"/>
+                                            <TextBox x:Name="txtSearch" Grid.Column="1" 
+                                                     Style="{StaticResource ModernTextBox}" 
+                                                     TextChanged="SearchBox_TextChanged"
+                                                     ToolTip="Search parameters by name..."/>
+                                        </Grid>
+
+                                        <!-- Filters Row -->
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <!-- Scope Filter -->
+                                            <ComboBox x:Name="cmbFilter" Grid.Column="0" Style="{StaticResource ModernComboBox}" SelectionChanged="FilterParameters_SelectionChanged" ToolTip="Filter by scope">
+                                                <ComboBoxItem Content="All Parameters" IsSelected="True"/>
+                                                <ComboBoxItem Content="Instance Parameters"/>
+                                                <ComboBoxItem Content="Type Parameters"/>
+                                                <ComboBoxItem Content="Shared Parameters"/>
+                                                <ComboBoxItem Content="Family Parameters"/>
+                                            </ComboBox>
+                                            
+                                            <!-- Type Filter -->
+                                            <ComboBox x:Name="cmbTypeFilter" Grid.Column="2" Style="{StaticResource ModernComboBox}" SelectionChanged="FilterParameters_SelectionChanged" ToolTip="Filter by data type">
+                                                <ComboBoxItem Content="All Types" IsSelected="True"/>
+                                            </ComboBox>
+                                            
+                                            <!-- Group Filter -->
+                                            <ComboBox x:Name="cmbGroupFilter" Grid.Column="4" Style="{StaticResource ModernComboBox}" SelectionChanged="FilterParameters_SelectionChanged" ToolTip="Filter by parameter group">
+                                                <ComboBoxItem Content="All Groups" IsSelected="True"/>
+                                            </ComboBox>
+                                            
+                                            <!-- Clear Filters Button -->
+                                            <Button Grid.Column="6" Content="🔄" Click="ClearFilters_Click" 
+                                                    Style="{StaticResource SecondaryButton}" 
+                                                    Padding="8,4" Height="30" Width="30" 
+                                                    FontSize="12" ToolTip="Reset all filters"/>
+                                        </Grid>
+
+                                        <!-- Selection Tools -->
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <WrapPanel Grid.Column="0">
+                                                <Button Content="✓ All" Click="SelectAll_Click" Style="{StaticResource SecondaryButton}" Margin="0,0,4,0" Padding="8,4" Height="28" FontSize="11" ToolTip="Select all visible parameters"/>
+                                                <Button Content="✗ None" Click="SelectNone_Click" Style="{StaticResource SecondaryButton}" Margin="0,0,4,0" Padding="8,4" Height="28" FontSize="11" ToolTip="Deselect all parameters"/>
+                                                <Button Content="⇆ Invert" Click="InvertSelection_Click" Style="{StaticResource SecondaryButton}" Padding="8,4" Height="28" FontSize="11" ToolTip="Invert selection"/>
+                                            </WrapPanel>
+                                            
+                                            <!-- Selection Counter -->
+                                            <TextBlock x:Name="txtSelectionCount" Grid.Column="1" 
+                                                       Text="0 / 0 selected" 
+                                                       VerticalAlignment="Center" 
+                                                       HorizontalAlignment="Center"
+                                                       FontWeight="SemiBold" 
+                                                       Foreground="#666666"/>
+                                            
+                                            <!-- Preset Buttons -->
+                                            <WrapPanel Grid.Column="2">
+                                                <Button Content="💾 Save" Click="SavePreset_Click" Style="{StaticResource SecondaryButton}" Margin="0,0,4,0" Padding="8,4" Height="28" FontSize="11" ToolTip="Save current selection as preset"/>
+                                                <Button Content="📂 Load" Click="LoadPreset_Click" Style="{StaticResource SecondaryButton}" Padding="8,4" Height="28" FontSize="11" ToolTip="Load selection preset"/>
+                                            </WrapPanel>
+                                        </Grid>
+
+                                        <!-- Parameter ListView -->
+                                        <Border BorderBrush="{StaticResource GrayBorder}" BorderThickness="1" Background="White" MaxHeight="280">
+                                            <ListView x:Name="lvParameters" 
+                                                      SelectionMode="Extended"
+                                                      BorderThickness="0"
+                                                      Background="Transparent">
+                                                <ListView.ItemContainerStyle>
+                                                    <Style TargetType="ListViewItem">
+                                                        <EventSetter Event="PreviewMouseLeftButtonUp" Handler="ListViewItem_PreviewMouseLeftButtonUp"/>
+                                                        <Setter Property="Background" Value="Transparent"/>
+                                                        <Setter Property="BorderThickness" Value="0"/>
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Background" Value="#F0F0F0"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ListView.ItemContainerStyle>
+                                                <ListView.View>
+                                                    <GridView>
+                                                        <GridViewColumn Width="30">
+                                                            <GridViewColumn.Header>
+                                                                <CheckBox x:Name="chkSelectAllHeader" 
+                                                                          Checked="SelectAllHeader_Checked" 
+                                                                          Unchecked="SelectAllHeader_Unchecked"
+                                                                          ToolTip="Select/Deselect all"/>
+                                                            </GridViewColumn.Header>
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" 
+                                                                              Checked="ParameterCheckBox_Changed"
+                                                                              Unchecked="ParameterCheckBox_Changed"/>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Header="Name" Width="180" DisplayMemberBinding="{Binding Name}"/>
+                                                        <GridViewColumn Header="Type" Width="100" DisplayMemberBinding="{Binding ParameterType}"/>
+                                                        <GridViewColumn Header="Scope" Width="70" DisplayMemberBinding="{Binding ScopeDisplay}"/>
+                                                        <GridViewColumn Header="Kind" Width="70" DisplayMemberBinding="{Binding KindDisplay}"/>
+                                                        <GridViewColumn Header="Group" Width="120" DisplayMemberBinding="{Binding GroupName}"/>
+                                                    </GridView>
+                                                </ListView.View>
+                                            </ListView>
+                                        </Border>
+                                        
+                                        <!-- Legacy StackPanel (hidden, for compatibility) -->
+                                        <StackPanel x:Name="pnlSourceParameters" Visibility="Collapsed"/>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Destination Card (Revit Targets) -->
+                        <Border x:Name="grpDestination" Style="{StaticResource Card}">
+                            <StackPanel>
+                                <GroupBox Header="DESTINATION FAMILIES" Style="{StaticResource ModernGroupBox}">
+                                    <StackPanel>
+                                        <ListBox x:Name="lstDestinationFamilies" 
+                                                 Style="{StaticResource ModernListBox}"
+                                                 MinHeight="120" 
+                                                 MaxHeight="200"
+                                                 Margin="0,0,0,16"/>
+                                        
+                                        <WrapPanel Orientation="Horizontal">
+                                            <Button Content="Add from Model" 
+                                                    Style="{StaticResource SecondaryButton}" 
+                                                    Margin="0,0,8,8"
+                                                    Click="AddDestinationFamilies_Click"/>
+                                            <Button Content="Add Open Families" 
+                                                    Style="{StaticResource SecondaryButton}" 
+                                                    Margin="0,0,8,8"
+                                                    Click="AddOpenFamilies_Click"/>
+                                            <Button Content="Remove Selected" 
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Margin="0,0,0,8"
+                                                    Click="RemoveDestinationFamily_Click"/>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </GroupBox>
+                                <GroupBox Header="OPTIONS" Style="{StaticResource ModernGroupBox}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkOverwriteExisting" 
+                                                  Content="Overwrite existing parameters" 
+                                                  Style="{StaticResource ModernCheckBox}"/>
+                                        <CheckBox x:Name="chkSkipErrors" 
+                                                  Content="Skip errors and continue" 
+                                                  Style="{StaticResource ModernCheckBox}" 
+                                                  IsChecked="True"/>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Action Bar -->
+                        <Grid Margin="0,8,0,0">
+                            <Button x:Name="btnAction"
+                                    Content="TRANSFER PARAMETERS" 
+                                    Style="{StaticResource PrimaryButton}" 
+                                    Width="250"
+                                    HorizontalAlignment="Center"
+                                    Click="ExecuteAction_Click"/>
+                        </Grid>
+                        
+                    </StackPanel>
+                </Border>
+            </ScrollViewer>
+        </Grid>
+        </Border>
+    </Border>
+</Window>

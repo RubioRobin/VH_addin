@@ -1,0 +1,70 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework Condition="!$(Configuration.Contains('2025'))">net48</TargetFramework>
+    <TargetFramework Condition="$(Configuration.Contains('2025'))">net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <LangVersion>latest</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <Configurations>Debug2023;Release2023;Debug2024;Release2024;Debug2025;Release2025</Configurations>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <!-- Revit 2023 Configuration -->
+  <PropertyGroup Condition="$(Configuration.Contains('2023'))">
+    <DefineConstants>REVIT2023</DefineConstants>
+    <OutputPath>bin\2023\</OutputPath>
+    <RevitVersion>2023</RevitVersion>
+  </PropertyGroup>
+
+  <!-- Revit 2024 Configuration -->
+  <PropertyGroup Condition="$(Configuration.Contains('2024'))">
+    <DefineConstants>REVIT2024</DefineConstants>
+    <OutputPath>bin\2024\</OutputPath>
+    <RevitVersion>2024</RevitVersion>
+  </PropertyGroup>
+
+  <!-- Revit 2025 Configuration -->
+  <PropertyGroup Condition="$(Configuration.Contains('2025'))">
+    <DefineConstants>REVIT2025</DefineConstants>
+    <OutputPath>bin\2025\</OutputPath>
+    <RevitVersion>2025</RevitVersion>
+  </PropertyGroup>
+
+  <!-- Revit API References for 2023 -->
+  <ItemGroup Condition="$(Configuration.Contains('2023'))">
+    <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2023.0.0" />
+  </ItemGroup>
+
+  <!-- Revit API References for 2024 -->
+  <ItemGroup Condition="$(Configuration.Contains('2024'))">
+    <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2024.0.0" />
+  </ItemGroup>
+
+  <!-- Revit API References for 2025 -->
+  <ItemGroup Condition="$(Configuration.Contains('2025'))">
+    <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2025.0.0" />
+  </ItemGroup>
+
+  <!-- Common NuGet Packages -->
+  <ItemGroup>
+    <PackageReference Include="EPPlus" Version="7.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <!-- Common References (Legacy Framework only) -->
+  <ItemGroup Condition="!$(Configuration.Contains('2025'))">
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+
+  <Target Name="AfterClean">
+    <RemoveDir Directories="$(BaseIntermediateOutputPath)" />
+  </Target>
+
+</Project>

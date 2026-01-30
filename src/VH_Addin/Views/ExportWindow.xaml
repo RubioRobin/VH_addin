@@ -1,8 +1,9 @@
 <Window x:Class="VH_Addin.Views.ExportWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Export Tools" Height="600" Width="650"
+        Title="Export Tools" Height="650" Width="700"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="CanResizeWithGrip"
         WindowStartupLocation="CenterOwner">
 
     <Window.Resources>
@@ -56,7 +57,7 @@
                 <!-- Content Area -->
                 <Grid Grid.Row="2">
                     <!-- Tab: Selection -->
-                    <Grid x:Name="gridTabSelection" Visibility="Visible">
+                    <Grid x:Name="gridTabSelection" Visibility="Visible" Background="White">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/> <!-- Folder -->
                             <RowDefinition Height="*"/>    <!-- List -->
@@ -86,27 +87,32 @@
                             </Grid.RowDefinitions>
                             <Grid Margin="0,0,0,5">
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="Selecteer Sheets:" FontWeight="SemiBold" Foreground="#64748B" FontSize="11" Margin="0,0,10,0"/>
-                                    <!-- Search Box -->
-                                    <Border BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="4" Background="White" Width="200">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="🔍" VerticalAlignment="Center" Margin="5,0,5,0" Foreground="#94A3B8" FontSize="10"/>
-                                            <TextBox x:Name="txtSearch" Grid.Column="1" BorderThickness="0" Background="Transparent" 
-                                                     Padding="2" FontSize="11" VerticalContentAlignment="Center"
-                                                     TextChanged="TxtSearch_TextChanged" GotFocus="TxtSearch_GotFocus" LostFocus="TxtSearch_LostFocus"
-                                                     Foreground="#94A3B8" Text="Zoeken op nummer of naam..."/>
-                                        </Grid>
-                                    </Border>
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                
+                                <!-- Print Set (ViewSheetSet) Selection -->
+                                <ComboBox x:Name="cmbPrintSets" Width="180" Margin="0,0,10,0" Padding="5,2" SelectionChanged="CmbPrintSets_SelectionChanged">
+                                    <ComboBoxItem Content="&lt;All Sheets&gt;" IsSelected="True"/>
+                                </ComboBox>
+
+                                <!-- Search Box -->
+                                <Border Grid.Column="1" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="4" Background="White" HorizontalAlignment="Stretch">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="🔍" VerticalAlignment="Center" Margin="5,0,5,0" Foreground="#94A3B8" FontSize="10"/>
+                                        <TextBox x:Name="txtSearch" Grid.Column="1" BorderThickness="0" Background="Transparent" 
+                                                 Padding="2" FontSize="11" VerticalContentAlignment="Center"
+                                                 TextChanged="TxtSearch_TextChanged" GotFocus="TxtSearch_GotFocus" LostFocus="TxtSearch_LostFocus"
+                                                 Foreground="#94A3B8" Text="Zoeken op nummer of naam..."/>
+                                    </Grid>
+                                </Border>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0,0,0">
                                     <Button Content="Alles" Style="{StaticResource LinkButton}" Click="BtnSelectAll_Click"/>
                                     <TextBlock Text=" | " Foreground="#E2E8F0" VerticalAlignment="Center"/>
                                     <Button Content="Geen" Style="{StaticResource LinkButton}" Click="BtnSelectNone_Click"/>
@@ -143,7 +149,7 @@
                     </Grid>
 
                     <!-- Tab: Settings -->
-                    <Grid x:Name="gridTabSettings" Visibility="Collapsed" Margin="20,10">
+                    <Grid x:Name="gridTabSettings" Visibility="Collapsed" Margin="20,10" Background="White">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -248,11 +254,12 @@
                         <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10,0,0">
                             <CheckBox x:Name="chkHideUnreferencedTags" Content="Verberg onverwezen view tags" IsChecked="True" Margin="0,0,0,8"/>
                             <CheckBox x:Name="chkMaskCoincidentLines" Content="Coïncidente lijnen maskeren" IsChecked="True" Margin="0,0,0,8"/>
+                            <CheckBox x:Name="chkOpenFolder" Content="Open map na exporteren" IsChecked="True" Margin="0,0,0,8" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Grid>
 
                     <!-- Tab: Naming -->
-                    <Grid x:Name="gridTabNaming" Visibility="Collapsed" Margin="20,10">
+                    <Grid x:Name="gridTabNaming" Visibility="Collapsed" Margin="20,10" Background="White">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
@@ -290,8 +297,8 @@
                                 <ListBox x:Name="listNamingRule" DisplayMemberPath="DisplayName" Margin="0,0,0,5"/>
                                 <StackPanel Grid.Row="1">
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                                        <CheckBox x:Name="chkAutoSeparator" Content="Auto Scheiding:" VerticalAlignment="Center" Checked="ExportFormat_Changed" Unchecked="ExportFormat_Changed"/>
-                                        <TextBox x:Name="txtAutoSeparator" Text="-" Width="30" Margin="5,0,0,0" Padding="2" TextChanged="ExportFormat_Changed"/>
+                                        <CheckBox x:Name="chkAutoSeparator" Content="Auto Scheiding:" VerticalAlignment="Center" IsChecked="True" Checked="ExportFormat_Changed" Unchecked="ExportFormat_Changed"/>
+                                        <TextBox x:Name="txtAutoSeparator" Text="_" Width="30" Margin="5,0,0,0" Padding="2" TextChanged="ExportFormat_Changed"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                         <Button Content="↑" Click="BtnMoveUp_Click" Width="30" Margin="0,0,5,0" ToolTip="Omhoog"/>
@@ -317,7 +324,7 @@
                     </Grid>
 
                     <!-- Tab: Order -->
-                    <Grid x:Name="gridTabOrder" Visibility="Collapsed" Margin="20,10">
+                    <Grid x:Name="gridTabOrder" Visibility="Collapsed" Margin="20,10" Background="White">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
@@ -343,7 +350,7 @@
                     </Grid>
 
                     <!-- Tab: DWG Settings -->
-                    <Grid x:Name="gridTabDwgSettings" Visibility="Collapsed" Margin="20,10">
+                    <Grid x:Name="gridTabDwgSettings" Visibility="Collapsed" Margin="20,10" Background="White">
                         <StackPanel>
                             <TextBlock Text="DWG Export Instellingen" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,15"/>
                             
@@ -352,33 +359,20 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
+                                    
+                                    <TextBlock Text="Kies een Setup:" VerticalAlignment="Center" Margin="0,0,15,10" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="1" Text="Revit DWG Exporter" VerticalAlignment="Center" Margin="0,0,15,10"/>
 
-                                    <TextBlock Text="AutoCAD Versie" VerticalAlignment="Center" Margin="0,0,15,10"/>
-                                    <ComboBox Grid.Column="1" x:Name="cmbDwgVersion" Margin="0,0,0,10" Padding="5,2">
-                                        <ComboBoxItem Content="AutoCAD 2025" IsSelected="True"/>
-                                        <ComboBoxItem Content="AutoCAD 2018"/>
-                                        <ComboBoxItem Content="AutoCAD 2013"/>
-                                        <ComboBoxItem Content="AutoCAD 2010"/>
+                                    <ComboBox Grid.Column="1" x:Name="cmbDwgSetup" Margin="0,0,0,10" Padding="5,2" DisplayMemberPath="Name">
                                     </ComboBox>
-
-                                    <TextBlock Grid.Row="1" Text="Coördinatenstelsel" VerticalAlignment="Center" Margin="0,0,15,10"/>
-                                    <ComboBox Grid.Row="1" Grid.Column="1" x:Name="cmbDwgCoordinates" Margin="0,0,0,10" Padding="5,2">
-                                        <ComboBoxItem Content="Interne Oorsprong" IsSelected="True"/>
-                                        <ComboBoxItem Content="Gedeelde Coördinaten"/>
-                                    </ComboBox>
-
-                                    <TextBlock Grid.Row="2" Text="Eenheid" VerticalAlignment="Center" Margin="0,0,15,10"/>
-                                    <ComboBox Grid.Row="2" Grid.Column="1" x:Name="cmbDwgUnits" Padding="5,2">
-                                        <ComboBoxItem Content="Millimeters" IsSelected="True"/>
-                                        <ComboBoxItem Content="Meters"/>
-                                        <ComboBoxItem Content="Centimeters"/>
-                                    </ComboBox>
+                                    
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="Deze instellingen (lagen, lijnen, etc.) worden bepaald door de geselecteerde Setup in het Revit project." 
+                                               TextWrapping="Wrap" Foreground="#64748B" FontStyle="Italic" Margin="0,5,0,0" MaxWidth="350"/>
                                 </Grid>
                             </GroupBox>
                         </StackPanel>

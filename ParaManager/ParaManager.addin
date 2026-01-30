@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>ParaManager</Name>
+    <Assembly>ParaManager.dll</Assembly>
+    <FullClassName>ParaManager.App</FullClassName>
+    <ClientId>9C6F8E9B-2345-5678-90BC-DE1234567890</ClientId>
+    <VendorId>VH</VendorId>
+    <VendorDescription>Stage-VH Engineering - Advanced BIM Solutions</VendorDescription>
+  </AddIn>
+</RevitAddIns>

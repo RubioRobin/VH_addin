@@ -41,7 +41,7 @@ namespace VH_Tools.Utilities
 
             // Select candidates within 5m (MAX_B_DISTANCE) using rough spatial check
             var candidatesByDist = _allObstructions
-                .Where(o => o.element.Id.Value != window.Id.Value)
+                .Where(o => o.element.Id.IntegerValue != window.Id.IntegerValue)
                 .Select(o => {
                     BoundingBoxXYZ ob = o.element.get_BoundingBox(null);
                     if (ob == null) return (element: (Element)null, transform: (Transform)null, bbox: (BoundingBoxXYZ)null);

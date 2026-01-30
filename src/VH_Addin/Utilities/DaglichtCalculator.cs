@@ -165,7 +165,7 @@ namespace VH_Tools.Utilities
                 // 2. Determine which walls should be EXCLUDED from being obstructions (self-shadowing).
                 // Only exclude walls that are truly part of the host assembly (parallel AND intersecting tightly).
                 var assemblyWallIds = new HashSet<long>();
-                if (window.Host != null) assemblyWallIds.Add(window.Host.Id.Value);
+                if (window.Host != null) assemblyWallIds.Add(window.Host.Id.IntegerValue);
 
                 foreach (var w in faceCandidateWalls)
                 {
@@ -179,13 +179,13 @@ namespace VH_Tools.Utilities
                             // Parallel if wall direction is perpendicular to window facing
                             if (Math.Abs(wallDir.DotProduct(facing)) < 0.1)
                             {
-                                assemblyWallIds.Add(w.Id.Value);
+                                assemblyWallIds.Add(w.Id.IntegerValue);
                             }
                         }
                         else
                         {
                             // Fallback for curved walls
-                            assemblyWallIds.Add(w.Id.Value);
+                            assemblyWallIds.Add(w.Id.IntegerValue);
                         }
                     }
                 }
@@ -268,7 +268,7 @@ namespace VH_Tools.Utilities
 
             // Narrow search to 5m radius (LINE_LENGTH_FEET) using spatial filter
             var candidates = _allObstructions
-                .Where(o => o.element is Wall && !assemblyWallIds.Contains(o.element.Id.Value))
+                .Where(o => o.element is Wall && !assemblyWallIds.Contains(o.element.Id.IntegerValue))
                 .Select(o => {
                     BoundingBoxXYZ wb = o.element.get_BoundingBox(null);
                     if (wb == null) return (element: (Wall)null, bbox: (BoundingBoxXYZ)null);
