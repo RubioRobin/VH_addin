@@ -1,0 +1,212 @@
+<Window x:Class="VH_Addin.Views.KozijnGeneratorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VH_Addin.Views"
+        mc:Ignorable="d"
+        Title="Kozijn Generator" Height="500" Width="400"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="LabelText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#64748B"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="5,3"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Padding" Value="5,3"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Border Background="White" CornerRadius="15" BorderBrush="#E2E8F0" BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="4" BlurRadius="15" Opacity="0.15"/>
+            </Border.Effect>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Header -->
+                    <RowDefinition Height="*"/>    <!-- Content -->
+                    <RowDefinition Height="Auto"/> <!-- Footer -->
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <Border Grid.Row="0" Background="#F8FAFC" CornerRadius="15,15,0,0" Padding="20,15" MouseDown="TitleBar_MouseDown">
+                    <Grid>
+                        <TextBlock Text="Kozijn Generator" FontSize="16" FontWeight="Bold" Foreground="#1E293B"/>
+                        <Button Content="✕" HorizontalAlignment="Right" Click="BtnClose_Click" Background="Transparent" BorderThickness="0" FontWeight="Bold" Foreground="#94A3B8" Cursor="Hand"/>
+                    </Grid>
+                </Border>
+
+                <!-- Content Area -->
+                <Grid Grid.Row="1" Margin="20">
+                    
+                    <!-- STEP 1: Configuration -->
+                    <Grid Visibility="{Binding IsStep1Visible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/> <!-- Spacer -->
+                            <RowDefinition Height="Auto"/> <!-- Button -->
+                        </Grid.RowDefinitions>
+
+                        <!-- Folder Selection -->
+                        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                            <TextBlock Text="Families Map:" Foreground="#6B7280" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SelectedFolder}" VerticalContentAlignment="Center" Padding="5" Height="30" BorderBrush="#E5E7EB" BorderThickness="1"/>
+                                <Button Grid.Column="1" Content="..." Command="{Binding BrowseFolderCommand}" Width="30" Height="30" Margin="5,0,0,0" Background="White" BorderBrush="#E5E7EB" BorderThickness="1"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Material & Division -->
+                        <StackPanel Grid.Row="1" Margin="0,0,0,15">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Materiaal:" Foreground="#6B7280" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                    <ComboBox ItemsSource="{Binding AvailableMaterials}" SelectedItem="{Binding SelectedMaterial}" Height="30" Padding="5"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Vlakverdeling:" Foreground="#6B7280" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                    <ComboBox ItemsSource="{Binding AvailableDivisions}" SelectedItem="{Binding SelectedDivision}" Height="30" Padding="5"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Width & Height -->
+                        <StackPanel Grid.Row="2" Margin="0,0,0,15">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Breedte (mm):" Foreground="#6B7280" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                    <TextBox Text="{Binding Width}" Height="30" VerticalContentAlignment="Center" Padding="5"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Hoogte (mm):" Foreground="#6B7280" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                    <TextBox Text="{Binding Height}" Height="30" VerticalContentAlignment="Center" Padding="5"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Next Button -->
+                        <Button Grid.Row="5" Content="Kozijn Aanmaken" Command="{Binding NextStepCommand}" 
+                                Background="#e50914" Foreground="White" FontWeight="Bold" Height="40" 
+                                BorderThickness="0" Cursor="Hand">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="4"/>
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+                    </Grid>
+
+                    <!-- STEP 2: Parameters -->
+                    <Grid Visibility="{Binding IsStep2Visible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/> <!-- Merk -->
+                            <RowDefinition Height="Auto"/> <!-- Title -->
+                            <RowDefinition Height="*"/>    <!-- Dynamic List -->
+                            <RowDefinition Height="Auto"/> <!-- Actions -->
+                        </Grid.RowDefinitions>
+
+                        <!-- Kozijn Merk -->
+                        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                            <TextBlock Text="Kozijn Merk:" Foreground="#6B7280" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <TextBox Text="{Binding KozijnMerk}" Height="30" VerticalContentAlignment="Center" Padding="5"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="1" Text="Vlakvullingen:" Foreground="#6B7280" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+                        <!-- Dynamic Parameters List -->
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,0,0,20">
+                            <ItemsControl ItemsSource="{Binding DynamicParameters}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="150"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Foreground="#374151"/>
+                                            <ComboBox Grid.Column="1" 
+                                                      ItemsSource="{Binding Options}" 
+                                                      SelectedItem="{Binding Value, Mode=TwoWay}"
+                                                      IsEditable="True"
+                                                      Height="30" Padding="5"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                        <!-- Buttons -->
+                        <Grid Grid.Row="3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Button Grid.Column="0" Content="Terug" Command="{Binding PreviousStepCommand}" 
+                                    Background="White" Foreground="#374151" BorderBrush="#D1D5DB" BorderThickness="1"
+                                    FontWeight="SemiBold" Height="40" Width="100" Cursor="Hand">
+                                 <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                            </Button>
+
+                            <Button Grid.Column="2" Content="Type Creëren &amp; Inladen" Command="{Binding FinalizeCommand}" 
+                                    Background="#e50914" Foreground="White" FontWeight="Bold" Height="40" Width="180"
+                                    BorderThickness="0" Cursor="Hand">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                            </Button>
+                        </Grid>
+                    </Grid>
+
+                </Grid>
+
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

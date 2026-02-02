@@ -86,6 +86,9 @@ namespace VH_Addin
                 AddPushButton(toolsPanel, "VH_SpotElevations", "Spot Elev.\nOverride", "VH_Tools.Commands.SpotElevationsCommand", assemblyPath,
                     "Override graphic settings for spot elevations", "Apply graphic overrides (line pattern, weight, transparency, etc.) to all spot elevations in the current view.", vhIcon);
 
+                AddPushButton(toolsPanel, "VH_KozijnGenerator", "Kozijn\nGenerator", "VH_Addin.Commands.KozijnGeneratorCommand", assemblyPath,
+                    "Genereer en laad kozijnfamilies", "Selecteer een familie uit een map, configureer afmetingen en parameters, en laad een nieuw type in het project.", vhIcon);
+
                 File.AppendAllText(logFile, $"{DateTime.Now}: OnStartup Complete.{Environment.NewLine}");
                 return Result.Succeeded;
             }
@@ -116,7 +119,11 @@ namespace VH_Addin
                     button.Image = icon;
                 }
             }
-            catch { } // Prevent one button failure from stopping the rest
+            catch (Exception ex)
+            {
+                 string log = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "VH_Addins", "startup.log");
+                 File.AppendAllText(log, $"{DateTime.Now}: ERROR adding button '{name}': {ex.Message}\n{ex.StackTrace}{Environment.NewLine}");
+            }
         }
 
         public Result OnShutdown(UIControlledApplication application)

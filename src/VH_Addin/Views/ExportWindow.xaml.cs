@@ -36,6 +36,20 @@ namespace VH_Addin.Views
             public double WidthMM { get; set; }
             public double HeightMM { get; set; }
 
+            private string _extraParamValue;
+            public string ExtraParamValue { get => _extraParamValue; set { _extraParamValue = value; OnPropertyChanged(nameof(ExtraParamValue)); } }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+            protected void OnPropertyChanged(string n) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+        }
+
+        public class PrintSetItem : INotifyPropertyChanged
+        {
+            private bool _isChecked;
+            public bool IsChecked { get => _isChecked; set { _isChecked = value; OnPropertyChanged(nameof(IsChecked)); } }
+            public string Name { get; set; }
+            public ViewSheetSet PrintSet { get; set; }
+
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged(string n) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
         }
@@ -44,8 +58,21 @@ namespace VH_Addin.Views
         {
             public bool IsParameter { get; set; }
             public bool IsDate { get; set; }
+            public bool IsPrintSet { get; set; }
             public string Name { get; set; } // Parameter name or static text
-            public string DisplayName => IsParameter ? $"[{Name}]" : (IsDate ? "[Datum:JJMMDD]" : Name);
+            public string DisplayName => IsParameter ? $"[{Name}]" : (IsDate ? "[Datum:JJMMDD]" : (IsPrintSet ? "[Print Set Naam]" : Name));
+
+            public event PropertyChangedEventHandler PropertyChanged;
+            protected void OnPropertyChanged(string n) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+        }
+
+        public class OrderGroup : INotifyPropertyChanged
+        {
+            public string Name { get; set; }
+            public ObservableCollection<SheetItem> Sheets { get; set; } = new ObservableCollection<SheetItem>();
+
+            private SheetItem _selectedSheet;
+            public SheetItem SelectedSheet { get => _selectedSheet; set { _selectedSheet = value; OnPropertyChanged(nameof(SelectedSheet)); } }
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged(string n) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
@@ -57,6 +84,8 @@ namespace VH_Addin.Views
             public ElementId Id { get; set; }
         }
 
+        public ObservableCollection<PrintSetItem> PrintSetItems { get; set; } = new ObservableCollection<PrintSetItem>();
+        public ObservableCollection<OrderGroup> OrderGroups { get; set; } = new ObservableCollection<OrderGroup>();
         public ObservableCollection<SheetItem> Sheets { get; set; } = new ObservableCollection<SheetItem>();
         public ObservableCollection<SheetItem> OrderedSheets { get; set; } = new ObservableCollection<SheetItem>();
         public ObservableCollection<NamingPart> NamingRule { get; set; } = new ObservableCollection<NamingPart>();
@@ -130,6 +159,7 @@ namespace VH_Addin.Views
                 _settings.CombinePdf = chkCombinePdf.IsChecked == true;
                 _settings.ColorMode = cmbColorMode.SelectedIndex;
                 _settings.RasterQuality = cmbRasterQuality.SelectedIndex;
+                _settings.ExtraParamName = (cmbExtraParam.SelectedItem as ParameterItem)?.Name;
                 
                 if (cmbDwgSetup.SelectedItem is ExportDWGSettings dwgSet)
                 {
@@ -141,6 +171,7 @@ namespace VH_Addin.Views
                 {
                     if (part.IsParameter) _settings.NamingRule.Add($"[{part.Name}]");
                     else if (part.IsDate) _settings.NamingRule.Add("[Datum:JJMMDD]");
+                    else if (part.IsPrintSet) _settings.NamingRule.Add("[PrintSet]");
                     else _settings.NamingRule.Add(part.Name);
                 }
 
@@ -172,11 +203,18 @@ namespace VH_Addin.Views
             cmbColorMode.SelectedIndex = _settings.ColorMode;
             cmbRasterQuality.SelectedIndex = _settings.RasterQuality;
 
+            if (!string.IsNullOrEmpty(_settings.ExtraParamName))
+            {
+                var match = AvailableParameters.FirstOrDefault(p => p.Name == _settings.ExtraParamName);
+                if (match != null) cmbExtraParam.SelectedItem = match;
+            }
+
             // Reconstruct Naming Rule
             NamingRule.Clear();
             foreach (string s in _settings.NamingRule)
             {
                 if (s.StartsWith("[Datum:")) NamingRule.Add(new NamingPart { IsDate = true, Name = "Date" });
+                else if (s == "[PrintSet]") NamingRule.Add(new NamingPart { IsPrintSet = true, Name = "PrintSet" });
                 else if (s.StartsWith("[") && s.EndsWith("]")) NamingRule.Add(new NamingPart { IsParameter = true, Name = s.Trim('[', ']') });
                 else NamingRule.Add(new NamingPart { IsParameter = false, Name = s });
             }
@@ -185,15 +223,16 @@ namespace VH_Addin.Views
 
         private void LoadPrintSets()
         {
-            _printSets = new FilteredElementCollector(_doc)
+            var sets = new FilteredElementCollector(_doc)
                 .OfClass(typeof(ViewSheetSet))
                 .Cast<ViewSheetSet>()
                 .OrderBy(s => s.Name)
                 .ToList();
 
-            foreach (var set in _printSets)
+            PrintSetItems.Clear();
+            foreach (var set in sets)
             {
-                cmbPrintSets.Items.Add(new ComboBoxItem { Content = set.Name, Tag = set });
+                PrintSetItems.Add(new PrintSetItem { Name = set.Name, PrintSet = set });
             }
         }
 
@@ -224,10 +263,16 @@ namespace VH_Addin.Views
         {
             if (obj is SheetItem item)
             {
-                // Print Set Filter
-                if (cmbPrintSets.SelectedItem is ComboBoxItem cbi && cbi.Tag is ViewSheetSet vss)
+                // Print Set Filter - If any checked, show only those that are in ANY of the checked sets
+                var checkedSets = PrintSetItems.Where(ps => ps.IsChecked).ToList();
+                if (checkedSets.Any())
                 {
-                    if (!vss.Views.Contains(item.Sheet)) return false;
+                    bool found = false;
+                    foreach (var ps in checkedSets)
+                    {
+                        if (ps.PrintSet.Views.Contains(item.Sheet)) { found = true; break; }
+                    }
+                    if (!found) return false;
                 }
 
                 // Search Filter
@@ -240,10 +285,93 @@ namespace VH_Addin.Views
             return false;
         }
 
-        private void CmbPrintSets_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void PrintSet_Changed(object sender, RoutedEventArgs e)
         {
             _sheetsView?.Refresh();
-            // Auto-select visible sheets? Maybe optional. For now just filter list.
+            UpdateOrderGroups();
+        }
+
+        private void CmbExtraParam_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cmbExtraParam.SelectedItem is ParameterItem pi)
+            {
+                colExtraParam.Header = pi.Name;
+                foreach (var item in Sheets)
+                {
+                    Parameter p = item.Sheet.LookupParameter(pi.Name);
+                    if (p != null) item.ExtraParamValue = p.AsValueString() ?? p.AsString() ?? "";
+                    else item.ExtraParamValue = "";
+                }
+            }
+        }
+
+        private void UpdateOrderGroups()
+        {
+            if (chkCombinePdf.IsChecked != true) return;
+
+            var checkedSets = PrintSetItems.Where(ps => ps.IsChecked).ToList();
+            var selectedSheets = Sheets.Where(s => s.IsSelected).ToList();
+
+            // Clear groups that are no longer checked
+            var toRemove = OrderGroups.Where(og => !checkedSets.Any(ps => ps.Name == og.Name) && og.Name != "Alle Geselecteerd").ToList();
+            foreach (var og in toRemove) OrderGroups.Remove(og);
+
+            // Add or Update groups for checked sets
+            foreach (var ps in checkedSets)
+            {
+                var existing = OrderGroups.FirstOrDefault(og => og.Name == ps.Name);
+                var sheetsInSet = selectedSheets.Where(s => ps.PrintSet.Views.Contains(s.Sheet)).ToList();
+
+                if (existing == null)
+                {
+                    var newGroup = new OrderGroup { Name = ps.Name };
+                    foreach (var s in sheetsInSet) newGroup.Sheets.Add(s);
+                    OrderGroups.Add(newGroup);
+                }
+                else
+                {
+                    // Update sheets - keep existing order for existing sheets, add new ones at the end
+                    var currentOrder = existing.Sheets.ToList();
+                    existing.Sheets.Clear();
+                    
+                    // Add existing ones that are still selected
+                    foreach (var s in currentOrder)
+                    {
+                        if (sheetsInSet.Contains(s))
+                        {
+                            existing.Sheets.Add(s);
+                            sheetsInSet.Remove(s);
+                        }
+                    }
+                    // Add new ones
+                    foreach (var s in sheetsInSet) existing.Sheets.Add(s);
+                }
+            }
+
+            // Fallback: If no sets checked but combine is on, show "Alle Geselecteerd"
+            if (!checkedSets.Any() && selectedSheets.Any())
+            {
+                var existing = OrderGroups.FirstOrDefault(og => og.Name == "Alle Geselecteerd");
+                if (existing == null)
+                {
+                    var newGroup = new OrderGroup { Name = "Alle Geselecteerd" };
+                    foreach (var s in selectedSheets) newGroup.Sheets.Add(s);
+                    OrderGroups.Add(newGroup);
+                }
+                else
+                {
+                    // Same update logic as above
+                    var currentOrder = existing.Sheets.ToList();
+                    existing.Sheets.Clear();
+                    foreach (var s in currentOrder) if (selectedSheets.Contains(s)) { existing.Sheets.Add(s); selectedSheets.Remove(s); }
+                    foreach (var s in selectedSheets) existing.Sheets.Add(s);
+                }
+            }
+            else
+            {
+                var fallback = OrderGroups.FirstOrDefault(og => og.Name == "Alle Geselecteerd");
+                if (fallback != null) OrderGroups.Remove(fallback);
+            }
         }
 
         private void LoadParameters()
@@ -276,29 +404,57 @@ namespace VH_Addin.Views
                 .OrderBy(s => s.SheetNumber)
                 .ToList();
 
+            // Optimization: Batch collect all title blocks to avoid O(N^2) collector calls
+            var titleBlocks = new FilteredElementCollector(_doc)
+                .OfCategory(BuiltInCategory.OST_TitleBlocks)
+                .WhereElementIsNotElementType()
+                .ToList();
+
+            // Map title blocks by their OwnerViewId (the sheet they belong to)
+            var tbMap = new Dictionary<ElementId, Element>();
+            foreach (var tb in titleBlocks)
+            {
+                if (tb.OwnerViewId != ElementId.InvalidElementId && !tbMap.ContainsKey(tb.OwnerViewId))
+                {
+                    tbMap[tb.OwnerViewId] = tb;
+                }
+            }
+
+            var items = new List<SheetItem>();
             foreach (var s in sheetList)
             {
                 var item = new SheetItem { Sheet = s };
-                DetectSheetSize(item);
-                Sheets.Add(item);
+                
+                // Get pre-collected title block from mapping
+                tbMap.TryGetValue(s.Id, out Element tb);
+                DetectSheetSize(item, tb);
+
+                // Initial extra param value
+                if (!string.IsNullOrEmpty(_settings.ExtraParamName))
+                {
+                    Parameter p = s.LookupParameter(_settings.ExtraParamName);
+                    if (p != null) item.ExtraParamValue = p.AsValueString() ?? p.AsString() ?? "";
+                }
+                
+                items.Add(item);
             }
+            
+            Sheets = new ObservableCollection<SheetItem>(items);
             dgSheets.ItemsSource = Sheets;
         }
 
-        private void DetectSheetSize(SheetItem item)
+        private void DetectSheetSize(SheetItem item, Element tb)
         {
-            var tb = new FilteredElementCollector(_doc, item.Sheet.Id)
-                .OfCategory(BuiltInCategory.OST_TitleBlocks)
-                .WhereElementIsNotElementType()
-                .FirstOrDefault();
-
             if (tb != null)
             {
-                var bb = tb.get_BoundingBox(item.Sheet);
-                if (bb != null)
+                // Deep Optimization: Use parameters instead of BoundingBox to avoid geometry generation
+                Parameter wp = tb.get_Parameter(BuiltInParameter.SHEET_WIDTH);
+                Parameter hp = tb.get_Parameter(BuiltInParameter.SHEET_HEIGHT);
+
+                if (wp != null && hp != null)
                 {
-                    double wFeet = bb.Max.X - bb.Min.X;
-                    double hFeet = bb.Max.Y - bb.Min.Y;
+                    double wFeet = wp.AsDouble();
+                    double hFeet = hp.AsDouble();
                     
                     double wMM = Math.Round(wFeet * 304.8);
                     double hMM = Math.Round(hFeet * 304.8);
@@ -317,6 +473,11 @@ namespace VH_Addin.Views
                     else if (MatchSize(max, min, 420, 297)) item.DetectedSize = "A3";
                     else if (MatchSize(max, min, 297, 210)) item.DetectedSize = "A4";
                     else item.DetectedSize = $"{max}x{min}";
+                }
+                else
+                {
+                    item.DetectedSize = "Var.";
+                    item.Orientation = "Var.";
                 }
             }
             else
@@ -378,33 +539,80 @@ namespace VH_Addin.Views
 
             panelProgress.Visibility = System.Windows.Visibility.Visible;
             btnExport.IsEnabled = false;
-            pbProgress.Maximum = selected.Count + (doCombine && doPdf ? 1 : 0);
+            
+            // Calculate total steps
+            int totalSteps = 0;
+            if (doPdf)
+            {
+                if (doCombine) totalSteps += 1;
+                else totalSteps += selected.Count;
+            }
+            if (doDwg)
+            {
+                totalSteps += selected.Count;
+            }
+
+            pbProgress.Maximum = totalSteps;
             pbProgress.Value = 0;
+            txtPercentage.Text = "0%";
 
             try
             {
-                int pCount = 0;
+                int currentStep = 0;
                 
+                void UpdateProgress(string message)
+                {
+                    txtProgress.Text = message;
+                    pbProgress.Value = currentStep;
+                    int pct = (int)((double)currentStep / totalSteps * 100);
+                    txtPercentage.Text = $"{pct}%";
+                    DoEvents();
+                }
+
                 if (doPdf && doCombine)
                 {
-                    txtProgress.Text = "Bezig met samenvoegen tot één PDF...";
-                    DoEvents();
-                    ExportSheetsToCombinedPdf(OrderedSheets.Any() ? OrderedSheets.ToList() : selected); // Use ordered if populated
-                    pCount++;
-                    pbProgress.Value = pCount;
+                    if (OrderGroups.Any())
+                    {
+                        foreach (var og in OrderGroups)
+                        {
+                            if (og.Sheets.Any())
+                            {
+                                UpdateProgress($"Samenvoegen: {og.Name}");
+                                string setName = (og.Name == "Alle Geselecteerd") ? null : og.Name;
+                                ExportSheetsToCombinedPdf(og.Sheets.ToList(), setName);
+                                currentStep++;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        UpdateProgress("Bezig met samenvoegen tot één PDF...");
+                        ExportSheetsToCombinedPdf(selected);
+                        currentStep++;
+                        UpdateProgress("PDF samengevoegd.");
+                    }
                 }
 
                 foreach (var item in selected)
                 {
-                    txtProgress.Text = $"Exporteren: {item.SheetNumber} - {item.Name}";
-                    DoEvents();
+                    if (doPdf && !doCombine)
+                    {
+                        UpdateProgress($"PDF Exporteren: {item.SheetNumber}");
+                        ExportSheetToPdf(item);
+                        currentStep++;
+                        UpdateProgress($"PDF Klaar: {item.SheetNumber}");
+                    }
 
-                    if (doPdf && !doCombine) ExportSheetToPdf(item);
-                    if (doDwg) ExportSheetToDwg(item);
-
-                    pCount++;
-                    pbProgress.Value = pCount;
+                    if (doDwg)
+                    {
+                        UpdateProgress($"DWG Exporteren: {item.SheetNumber}");
+                        ExportSheetToDwg(item);
+                        currentStep++;
+                        UpdateProgress($"DWG Klaar: {item.SheetNumber}");
+                    }
                 }
+
+                UpdateProgress("Export voltooid!");
 
                 if (chkOpenFolder.IsChecked == true)
                 {
@@ -466,11 +674,11 @@ namespace VH_Addin.Views
             _doc.Export(_targetFolder, new List<ElementId> { item.Sheet.Id }, options);
         }
 
-        private void ExportSheetsToCombinedPdf(List<SheetItem> items)
+        private void ExportSheetsToCombinedPdf(List<SheetItem> items, string printSetName = null)
         {
             PDFExportOptions options = new PDFExportOptions();
             options.Combine = true;
-            options.FileName = GetConfiguredFileName(items.First());
+            options.FileName = GetConfiguredFileName(items.First(), printSetName);
             options.PaperFormat = ExportPaperFormat.Default;
             options.PaperOrientation = PageOrientationType.Auto;
             options.HideUnreferencedViewTags = chkHideUnreferencedTags.IsChecked == true;
@@ -579,40 +787,89 @@ namespace VH_Addin.Views
             btnTabOrder.Visibility = combine ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
             if (combine)
             {
-                var selected = Sheets.Where(s => s.IsSelected).ToList();
-                var newOrdered = new ObservableCollection<SheetItem>();
-                foreach (var item in OrderedSheets) if (selected.Contains(item)) newOrdered.Add(item);
-                foreach (var item in selected) if (!newOrdered.Contains(item)) newOrdered.Add(item);
-                OrderedSheets = newOrdered;
-                listOrderedSheets.ItemsSource = OrderedSheets;
+                UpdateOrderGroups();
             }
         }
 
         private void BtnMoveSheetUp_Click(object sender, RoutedEventArgs e)
         {
-            int index = listOrderedSheets.SelectedIndex;
-            if (index > 0)
+            if (tcOrderGroups.SelectedItem is OrderGroup group && group.SelectedSheet != null)
             {
-                var item = OrderedSheets[index];
-                OrderedSheets.RemoveAt(index);
-                OrderedSheets.Insert(index - 1, item);
-                listOrderedSheets.SelectedIndex = index - 1;
+                int index = group.Sheets.IndexOf(group.SelectedSheet);
+                if (index > 0)
+                {
+                    var item = group.SelectedSheet;
+                    group.Sheets.RemoveAt(index);
+                    group.Sheets.Insert(index - 1, item);
+                    group.SelectedSheet = item;
+                }
             }
         }
 
         private void BtnMoveSheetDown_Click(object sender, RoutedEventArgs e)
         {
-            int index = listOrderedSheets.SelectedIndex;
-            if (index >= 0 && index < OrderedSheets.Count - 1)
+            if (tcOrderGroups.SelectedItem is OrderGroup group && group.SelectedSheet != null)
             {
-                var item = OrderedSheets[index];
-                OrderedSheets.RemoveAt(index);
-                OrderedSheets.Insert(index + 1, item);
-                listOrderedSheets.SelectedIndex = index + 1;
+                int index = group.Sheets.IndexOf(group.SelectedSheet);
+                if (index >= 0 && index < group.Sheets.Count - 1)
+                {
+                    var item = group.SelectedSheet;
+                    group.Sheets.RemoveAt(index);
+                    group.Sheets.Insert(index + 1, item);
+                    group.SelectedSheet = item;
+                }
             }
         }
 
-        private string GetConfiguredFileName(SheetItem item)
+        private void BtnMoveToTop_Click(object sender, RoutedEventArgs e)
+        {
+            if (tcOrderGroups.SelectedItem is OrderGroup group && group.SelectedSheet != null)
+            {
+                int index = group.Sheets.IndexOf(group.SelectedSheet);
+                if (index > 0)
+                {
+                    var item = group.SelectedSheet;
+                    group.Sheets.RemoveAt(index);
+                    group.Sheets.Insert(0, item);
+                    group.SelectedSheet = item;
+                }
+            }
+        }
+
+        private void BtnMoveToBottom_Click(object sender, RoutedEventArgs e)
+        {
+            if (tcOrderGroups.SelectedItem is OrderGroup group && group.SelectedSheet != null)
+            {
+                int index = group.Sheets.IndexOf(group.SelectedSheet);
+                if (index >= 0 && index < group.Sheets.Count - 1)
+                {
+                    var item = group.SelectedSheet;
+                    group.Sheets.RemoveAt(index);
+                    group.Sheets.Add(item);
+                    group.SelectedSheet = item;
+                }
+            }
+        }
+
+        private void ChkSheet_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox cb && cb.DataContext is SheetItem clickedItem)
+            {
+                var selectedInGrid = dgSheets.SelectedItems.Cast<SheetItem>().ToList();
+                if (selectedInGrid.Contains(clickedItem))
+                {
+                    bool newState = clickedItem.IsSelected;
+                    foreach (var item in selectedInGrid)
+                    {
+                        item.IsSelected = newState;
+                    }
+                }
+                UpdatePreview();
+                UpdateOrderGroups();
+            }
+        }
+
+        private string GetConfiguredFileName(SheetItem item, string printSetName = null)
         {
             List<string> values = new List<string>();
             foreach (var part in NamingRule)
@@ -624,6 +881,7 @@ namespace VH_Addin.Views
                     if (p != null) partValue = p.AsValueString() ?? p.AsString() ?? "";
                 }
                 else if (part.IsDate) partValue = DateTime.Now.ToString("yyMMdd");
+                else if (part.IsPrintSet) partValue = printSetName ?? "GeenSet";
                 else partValue = part.Name;
 
                 if (!string.IsNullOrEmpty(partValue)) values.Add(partValue);
@@ -657,6 +915,12 @@ namespace VH_Addin.Views
         private void BtnAddDate_Click(object sender, RoutedEventArgs e)
         {
             NamingRule.Add(new NamingPart { IsDate = true, Name = "Date" });
+            UpdatePreview();
+        }
+
+        private void BtnAddPrintSet_Click(object sender, RoutedEventArgs e)
+        {
+            NamingRule.Add(new NamingPart { IsPrintSet = true, Name = "PrintSet" });
             UpdatePreview();
         }
 
@@ -729,9 +993,27 @@ namespace VH_Addin.Views
             if (string.IsNullOrWhiteSpace(txtSearch.Text)) { txtSearch.Text = "Zoeken op nummer of naam..."; txtSearch.Foreground = System.Windows.Media.Brushes.Gray; }
         }
 
-        private void BtnSelectAll_Click(object sender, RoutedEventArgs e) { foreach (var s in Sheets) s.IsSelected = true; }
+        private void DgSheets_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+            {
+                var selectedItems = dgSheets.SelectedItems.Cast<SheetItem>().ToList();
+                if (selectedItems.Any())
+                {
+                    bool targetState = !selectedItems.First().IsSelected;
+                    foreach (var item in selectedItems)
+                    {
+                        item.IsSelected = targetState;
+                    }
+                    UpdatePreview();
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void BtnSelectAll_Click(object sender, RoutedEventArgs e) { foreach (var s in Sheets) s.IsSelected = true; UpdatePreview(); UpdateOrderGroups(); }
         
-        private void BtnSelectNone_Click(object sender, RoutedEventArgs e) { foreach (var s in Sheets) s.IsSelected = false; }
+        private void BtnSelectNone_Click(object sender, RoutedEventArgs e) { foreach (var s in Sheets) s.IsSelected = false; UpdatePreview(); UpdateOrderGroups(); }
         
         private void BtnCancel_Click(object sender, RoutedEventArgs e) => Close();
     }

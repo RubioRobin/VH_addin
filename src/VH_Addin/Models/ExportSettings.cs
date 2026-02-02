@@ -20,5 +20,7 @@ namespace VH_Addin.Models
         
         // DWG
         public string LastDwgSetupName { get; set; }
+
+        public string ExtraParamName { get; set; }
     }
 }

@@ -1,0 +1,125 @@
+<Project>
+  <PropertyGroup>
+    <AssemblyName>VH_Tools</AssemblyName>
+    <IntermediateOutputPath>obj\Debug2023\</IntermediateOutputPath>
+    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>M:\06b. VH Project Engineering\Projecten\Engineering\Beheer VH\scripts\C# plugins\VH_addins\src\VH_Addin\obj\</MSBuildProjectExtensionsPath>
+    <_TargetAssemblyProjectName>VH_ViewDuplicator</_TargetAssemblyProjectName>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <LangVersion>latest</LangVersion>
+    <Platforms>x64</Platforms>
+    <Configurations>Debug2023;Debug2024;Debug2025;Release2023;Release2024;Release2025</Configurations>
+    <AssemblyName>VH_Tools</AssemblyName>
+    <RootNamespace>VH_Tools</RootNamespace>
+  </PropertyGroup>
+  <!-- Revit 2023 & 2024 use .NET Framework 4.8 -->
+  <PropertyGroup Condition="$(Configuration.Contains('2023')) OR $(Configuration.Contains('2024'))">
+    <TargetFramework>net48</TargetFramework>
+  </PropertyGroup>
+  <!-- Revit 2025 uses .NET 8.0 -->
+  <PropertyGroup Condition="$(Configuration.Contains('2025'))">
+    <TargetFramework>net8.0-windows</TargetFramework>
+  </PropertyGroup>
+  <!-- Revit 2023 -->
+  <PropertyGroup Condition="$(Configuration.Contains('2023'))">
+    <DefineConstants>$(DefineConstants);REVIT2023</DefineConstants>
+    <RevitVersion>2023</RevitVersion>
+  </PropertyGroup>
+  <!-- Revit 2024 -->
+  <PropertyGroup Condition="$(Configuration.Contains('2024'))">
+    <DefineConstants>$(DefineConstants);REVIT2024</DefineConstants>
+    <RevitVersion>2024</RevitVersion>
+  </PropertyGroup>
+  <!-- Revit 2025 -->
+  <PropertyGroup Condition="$(Configuration.Contains('2025'))">
+    <DefineConstants>$(DefineConstants);REVIT2025</DefineConstants>
+    <RevitVersion>2025</RevitVersion>
+  </PropertyGroup>
+  <!-- Debug Configuration -->
+  <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <!-- Release Configuration -->
+  <PropertyGroup Condition="$(Configuration.Contains('Release'))">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <!-- Output Path -->
+  <PropertyGroup>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <!-- Revit API References -->
+  <ItemGroup>
+    <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" PrivateAssets="All" />
+    <PackageReference Include="System.Text.Json" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="ViewDuplicatorMainContent.xaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\VH_Icon32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\revit_all_main_versions_api_x64\2023.0.0\lib\net48\AdWindows.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.bcl.asyncinterfaces\8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\mscorlib.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\PresentationCore.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\PresentationFramework.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\revit_all_main_versions_api_x64\2023.0.0\lib\net48\RevitAPI.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\revit_all_main_versions_api_x64\2023.0.0\lib\net48\RevitAPIUI.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\system.buffers\4.5.1\ref\net45\System.Buffers.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\System.Core.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\System.Data.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\System.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\System.Drawing.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\System.IO.Compression.FileSystem.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\system.memory\4.5.5\lib\net461\System.Memory.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\System.Numerics.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\system.numerics.vectors\4.5.0\ref\net46\System.Numerics.Vectors.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\system.runtime.compilerservices.unsafe\6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\System.Runtime.Serialization.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\system.text.encodings.web\8.0.0\lib\net462\System.Text.Encodings.Web.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\system.text.json\8.0.0\lib\net462\System.Text.Json.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\system.threading.tasks.extensions\4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\system.valuetuple\4.5.0\ref\net47\System.ValueTuple.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\System.Windows.Controls.Ribbon.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\System.Windows.Forms.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\System.Xaml.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\System.Xml.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\System.Xml.Linq.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\UIAutomationClient.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\UIAutomationClientsideProviders.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\UIAutomationProvider.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\UIAutomationTypes.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\revit_all_main_versions_api_x64\2023.0.0\lib\net48\UIFramework.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\WindowsBase.dll" />
+    <ReferencePath Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\WindowsFormsIntegration.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="M:\06b. VH Project Engineering\Projecten\Engineering\Beheer VH\scripts\C# plugins\VH_addins\src\VH_Addin\obj\Debug2023\Views\BulkParametersWindow.g.cs" />
+    <Compile Include="M:\06b. VH Project Engineering\Projecten\Engineering\Beheer VH\scripts\C# plugins\VH_addins\src\VH_Addin\obj\Debug2023\Views\DaglichtWindow.g.cs" />
+    <Compile Include="M:\06b. VH Project Engineering\Projecten\Engineering\Beheer VH\scripts\C# plugins\VH_addins\src\VH_Addin\obj\Debug2023\Views\DetailSheetsWindow.g.cs" />
+    <Compile Include="M:\06b. VH Project Engineering\Projecten\Engineering\Beheer VH\scripts\C# plugins\VH_addins\src\VH_Addin\obj\Debug2023\Views\ExportWindow.g.cs" />
+    <Compile Include="M:\06b. VH Project Engineering\Projecten\Engineering\Beheer VH\scripts\C# plugins\VH_addins\src\VH_Addin\obj\Debug2023\Views\KozijnGeneratorWindow.g.cs" />
+    <Compile Include="M:\06b. VH Project Engineering\Projecten\Engineering\Beheer VH\scripts\C# plugins\VH_addins\src\VH_Addin\obj\Debug2023\Views\KozijnstaatSettingsWindow.g.cs" />
+    <Compile Include="M:\06b. VH Project Engineering\Projecten\Engineering\Beheer VH\scripts\C# plugins\VH_addins\src\VH_Addin\obj\Debug2023\Views\SheetCreatorWindow.g.cs" />
+    <Compile Include="M:\06b. VH Project Engineering\Projecten\Engineering\Beheer VH\scripts\C# plugins\VH_addins\src\VH_Addin\obj\Debug2023\Views\SheetRenamerWindow.g.cs" />
+    <Compile Include="M:\06b. VH Project Engineering\Projecten\Engineering\Beheer VH\scripts\C# plugins\VH_addins\src\VH_Addin\obj\Debug2023\Views\SpotElevationsWindow.g.cs" />
+    <Compile Include="M:\06b. VH Project Engineering\Projecten\Engineering\Beheer VH\scripts\C# plugins\VH_addins\src\VH_Addin\obj\Debug2023\Views\ViewDuplicatorWindow.g.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="C:\Users\BasAarntzen-VHEngine\.nuget\packages\system.text.json\8.0.0\analyzers\dotnet\roslyn4.4\cs\System.Text.Json.SourceGeneration.dll" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

@@ -1,0 +1,9 @@
+@echo off
+echo Adding files...
+git add .
+echo Committing changes...
+git commit -m "Refactor Kozijn Generator: 2-step wizard, dropdowns, parameter fixes"
+echo Pushing to remote...
+git push
+echo Done.
+pause

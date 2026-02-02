@@ -92,9 +92,17 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 
-                                <!-- Print Set (ViewSheetSet) Selection -->
-                                <ComboBox x:Name="cmbPrintSets" Width="180" Margin="0,0,10,0" Padding="5,2" SelectionChanged="CmbPrintSets_SelectionChanged">
-                                    <ComboBoxItem Content="&lt;All Sheets&gt;" IsSelected="True"/>
+                                <!-- Print Set Selection with Checkboxes -->
+                                <ComboBox x:Name="cmbPrintSets" Width="180" Margin="0,0,10,0" 
+                                          ItemsSource="{Binding PrintSetItems}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <CheckBox IsChecked="{Binding IsChecked}" VerticalAlignment="Center" Click="PrintSet_Changed"/>
+                                                <TextBlock Text="{Binding Name}" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
                                 </ComboBox>
 
                                 <!-- Search Box -->
@@ -103,12 +111,18 @@
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="🔍" VerticalAlignment="Center" Margin="5,0,5,0" Foreground="#94A3B8" FontSize="10"/>
                                         <TextBox x:Name="txtSearch" Grid.Column="1" BorderThickness="0" Background="Transparent" 
                                                  Padding="2" FontSize="11" VerticalContentAlignment="Center"
                                                  TextChanged="TxtSearch_TextChanged" GotFocus="TxtSearch_GotFocus" LostFocus="TxtSearch_LostFocus"
                                                  Foreground="#94A3B8" Text="Zoeken op nummer of naam..."/>
+                                        <ComboBox Grid.Column="2" x:Name="cmbExtraParam" Width="120" BorderThickness="0,0,0,0" 
+                                                  Padding="5,0" FontSize="10" VerticalContentAlignment="Center"
+                                                  ItemsSource="{Binding AvailableParameters}" DisplayMemberPath="Name"
+                                                  SelectionChanged="CmbExtraParam_SelectionChanged"
+                                                  ToolTip="Kies extra parameter voor de lijst"/>
                                     </Grid>
                                 </Border>
 
@@ -120,17 +134,21 @@
                             </Grid>
                             <Border Grid.Row="1" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="5">
                                 <DataGrid x:Name="dgSheets" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" 
-                                          BorderThickness="0" Background="Transparent" GridLinesVisibility="None" SelectionMode="Single">
+                                          BorderThickness="0" Background="Transparent" GridLinesVisibility="None" 
+                                          SelectionMode="Extended" PreviewKeyDown="DgSheets_PreviewKeyDown">
                                     <DataGrid.Columns>
                                         <DataGridTemplateColumn Width="40">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" 
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Click="ChkSheet_Click"/>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
                                         <DataGridTextColumn Header="Nummer" Binding="{Binding SheetNumber}" Width="100"/>
                                         <DataGridTextColumn Header="Naam" Binding="{Binding Name}" Width="*"/>
+                                        <DataGridTextColumn x:Name="colExtraParam" Header="Extra" Binding="{Binding ExtraParamValue}" Width="100"/>
                                         <DataGridTextColumn Header="Formaat" Binding="{Binding DetectedSize}" Width="60"/>
                                         <DataGridTextColumn Header="Orient." Binding="{Binding Orientation}" Width="60"/>
                                     </DataGrid.Columns>
@@ -282,6 +300,7 @@
                                 <ListBox x:Name="listAvailableParams" DisplayMemberPath="Name" Margin="0,0,0,5"/>
                                 <StackPanel Grid.Row="1">
                                     <Button Content="Voeg Parameter Toe" Click="BtnAddParam_Click" Padding="5,2" Background="#F1F5F9" BorderBrush="#E2E8F0" Margin="0,0,0,5"/>
+                                    <Button Content="[Print Set Naam]" Click="BtnAddPrintSet_Click" Padding="5,2" Background="#F1F5F9" BorderBrush="#E2E8F0" Margin="0,0,0,5"/>
                                     <Button x:Name="btnAddDate" Content="Dag van vandaag (JJMMDD)" Click="BtnAddDate_Click" Padding="5,2" Background="#F1F5F9" BorderBrush="#E2E8F0"/>
                                 </StackPanel>
                             </Grid>
@@ -331,21 +350,34 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <TextBlock Text="Volgorde voor samengestelde PDF" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,10"/>
-                        <Border Grid.Row="1" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="5">
-                            <ListBox x:Name="listOrderedSheets" BorderThickness="0" Background="Transparent">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding SheetNumber}" FontWeight="Bold" Width="80" Margin="5"/>
-                                            <TextBlock Text="{Binding Name}" Margin="5"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </Border>
+                        <TabControl Grid.Row="1" x:Name="tcOrderGroups" ItemsSource="{Binding OrderGroups}" BorderThickness="0" Background="Transparent">
+                            <TabControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </TabControl.ItemTemplate>
+                            <TabControl.ContentTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="5">
+                                        <ListBox ItemsSource="{Binding Sheets}" SelectedItem="{Binding SelectedSheet}" BorderThickness="0" Background="Transparent">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding SheetNumber}" FontWeight="Bold" Width="80" Margin="5"/>
+                                                        <TextBlock Text="{Binding Name}" Margin="5"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </Border>
+                                </DataTemplate>
+                            </TabControl.ContentTemplate>
+                        </TabControl>
                         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                            <Button Content="Helemaal boven ⇑" Click="BtnMoveToTop_Click" Padding="15,5" Margin="0,0,10,0" Background="#F1F5F9" BorderBrush="#E2E8F0"/>
                             <Button Content="Omhoog ↑" Click="BtnMoveSheetUp_Click" Padding="15,5" Margin="0,0,10,0" Background="#F1F5F9" BorderBrush="#E2E8F0"/>
-                            <Button Content="Omlaag ↓" Click="BtnMoveSheetDown_Click" Padding="15,5" Background="#F1F5F9" BorderBrush="#E2E8F0"/>
+                            <Button Content="Omlaag ↓" Click="BtnMoveSheetDown_Click" Padding="15,5" Margin="0,0,10,0" Background="#F1F5F9" BorderBrush="#E2E8F0"/>
+                            <Button Content="Helemaal onder ⇓" Click="BtnMoveToBottom_Click" Padding="15,5" Background="#F1F5F9" BorderBrush="#E2E8F0"/>
                         </StackPanel>
                     </Grid>
 
@@ -380,15 +412,18 @@
                 </Grid>
 
                 <!-- Progress -->
-                <Border Grid.Row="4" x:Name="panelProgress" Visibility="Collapsed" Padding="20,0,20,10">
+                <Border Grid.Row="3" x:Name="panelProgress" Visibility="Visible" Padding="20,0,20,5">
                     <StackPanel>
-                        <ProgressBar x:Name="pbProgress" Height="15" Minimum="0" Maximum="100"/>
-                        <TextBlock x:Name="txtProgress" Text="Bezig met exporteren..." FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,3,0,0"/>
+                        <Grid Margin="0,0,0,3">
+                            <TextBlock x:Name="txtProgress" Text="Klaar voor export" FontSize="11" Foreground="#64748B"/>
+                            <TextBlock x:Name="txtPercentage" Text="0%" FontSize="11" Foreground="#1E293B" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <ProgressBar x:Name="pbProgress" Height="10" Minimum="0" Maximum="100" Background="#F1F5F9" BorderThickness="0" Foreground="#B2996B"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Buttons -->
-                <Border Grid.Row="5" Background="#F8FAFC" CornerRadius="0,0,15,15" Padding="20,15">
+                <Border Grid.Row="4" Background="#F8FAFC" CornerRadius="0,0,15,15" Padding="20,15">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button x:Name="btnCancel" Content="Annuleren" Click="BtnCancel_Click" Margin="0,0,10,0" Padding="20,8" Background="White" BorderBrush="#E2E8F0"/>
                         <Button x:Name="btnExport" Content="Exporteren" Click="BtnExport_Click" Padding="25,8" Background="#B2996B" Foreground="White" FontWeight="Bold" BorderThickness="0"/>
